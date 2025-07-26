@@ -11,14 +11,15 @@ except ImportError:
 st.set_page_config(page_title="حاسبة التاريخ", layout="centered")
 st.title("🗓️ حاسبة اليوم والتاريخ")
 
-# الوقت الحالي
+# الوقت والتاريخ الحالي
 now = datetime.now()
 current_time = now.strftime("%H:%M:%S")
-current_day = now.strftime("%A")
+current_day = now.strftime("%A")  # 👈 هذا اليوم الحالي
 current_date = now.strftime("%Y-%m-%d")
 
+# ترتيب العرض
 st.markdown(f"### 🕒 الوقت الحالي: **{current_time}**")
-st.markdown(f"### 📆 اليوم: **{current_day}**")
+st.markdown(f"### 📆 اليوم الحالي: **{current_day}**")  # 👈 هذا بين الوقت والتاريخ
 st.markdown(f"### 📅 التاريخ الميلادي: **{current_date}**")
 
 if hijri_available:
