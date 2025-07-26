@@ -143,36 +143,67 @@ def main():
         )
 
     elif option == "إلى التاريخ والساعة (كم تبقى من يوم وساعة)":
-        today_default = now.strftime("%Y/%m/%d")
-        time_default = now.strftime("%H:%M")
+    today_default = now.strftime("%Y/%m/%d")
+    time_default = now.strftime("%H:%M")
 
-        date_input_str = st.sidebar.text_input("ادخل التاريخ المستقبلي:", value=today_default)
-        time_input_str = st.sidebar.text_input("ادخل الساعة:", value=time_default)
+    date_input_str = st.sidebar.text_input("ادخل التاريخ المستقبلي:", value=today_default)
 
-        if date_input_str and time_input_str:
-            try:
-                parts = date_input_str.replace("-", "/").split("/")
-                if len(parts) == 3:
-                    year, month, day = map(int, parts)
-                    parsed_time = parse_time_input(time_input_str)
-                    if parsed_time is None:
-                        st.sidebar.error("⚠️ صيغة الوقت غير صحيحة.")
-                    else:
-                        hour, minute = parsed_time
-                        target_datetime = datetime(year, month, day, hour, minute)
-                        diff = target_datetime - now
-                        if diff.total_seconds() > 0:
-                            days_left = diff.days
-                            hours_left = diff.seconds // 3600
-                            minutes_left = (diff.seconds % 3600) // 60
-                            day_name = days_ar[target_datetime.weekday()]
-                            st.sidebar.info(f"يتبقى **{days_left} يوم** و **{hours_left} ساعة** و **{minutes_left} دقيقة** (يصادف يوم {day_name})")
-                        else:
-                            st.sidebar.warning("⏳ التاريخ والوقت المحددين قد مرا بالفعل.")
+    # عمودين: واحد لادخال الوقت، والثاني للbadge
+    col_time, col_badge = st.sidebar.columns([4,1])
+    time_input_str = col_time.text_input("ادخل الساعة:", value=time_default)
+
+    # حساب حالة الوقت لعرض AM/PM
+    parsed_time = parse_time_input(time_input_str)
+    am_pm = ""
+    if parsed_time is not None:
+        hour, minute = parsed_time
+        am_pm = "AM" if hour < 12 else "PM"
+    else:
+        am_pm = "??"
+
+    # عرض badge صغير
+    col_badge.markdown(
+        f"""
+        <div style="
+            background-color: #0055cc;
+            color: white;
+            font-weight: bold;
+            border-radius: 5px;
+            padding: 4px 8px;
+            text-align: center;
+            margin-top: 22px;
+            font-size: 14px;
+            ">
+            {am_pm}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    if date_input_str and time_input_str:
+        try:
+            parts = date_input_str.replace("-", "/").split("/")
+            if len(parts) == 3:
+                year, month, day = map(int, parts)
+                if parsed_time is None:
+                    st.sidebar.error("⚠️ صيغة الوقت غير صحيحة.")
                 else:
-                    st.sidebar.error("⚠️ صيغة التاريخ غير صحيحة.")
-            except ValueError:
+                    hour, minute = parsed_time
+                    target_datetime = datetime(year, month, day, hour, minute)
+                    diff = target_datetime - now
+                    if diff.total_seconds() > 0:
+                        days_left = diff.days
+                        hours_left = diff.seconds // 3600
+                        minutes_left = (diff.seconds % 3600) // 60
+                        day_name = days_ar[target_datetime.weekday()]
+                        st.sidebar.info(f"يتبقى **{days_left} يوم** و **{hours_left} ساعة** و **{minutes_left} دقيقة** (يصادف يوم {day_name})")
+                    else:
+                        st.sidebar.warning("⏳ التاريخ والوقت المحددين قد مرا بالفعل.")
+            else:
                 st.sidebar.error("⚠️ صيغة التاريخ غير صحيحة.")
+        except ValueError:
+            st.sidebar.error("⚠️ صيغة التاريخ غير صحيحة.")
+
 
     # المحتوى الرئيسي بالصفحة
     dates = get_dates()
