@@ -37,7 +37,7 @@ def main():
     st.sidebar.markdown(f"<div style='direction: ltr;'>- هجري: {hijri_str}</div>", unsafe_allow_html=True)
 
     # إضافة expander لعرض الأيام مع تقسيم الأسابيع
-    with st.sidebar.expander("من اليوم الحالي حتى اليوم المنقول", expanded=False):
+    with st.sidebar.expander("عرض الأيام من اليوم الحالي حتى اليوم المنقول", expanded=False):
         total_days = days_ahead + 1
         weeks = (total_days - 1) // 7  # حساب عدد الأسابيع بعد أول 7 أيام
 
