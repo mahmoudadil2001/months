@@ -12,6 +12,7 @@ def main():
     now = datetime.utcnow() + timedelta(hours=3)
     time_now = now.strftime("%I:%M %p").lower()
 
+    # قائمة أسماء الأيام العربية (ترتيب الاثنين=0 ... الأحد=6)
     days_ar = ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"]
     today_name = days_ar[now.weekday()]
 
@@ -22,19 +23,14 @@ def main():
     transported_day_name = days_ar[transported_date.weekday()]
 
     st.sidebar.markdown(f"**التاريخ بعد {days_ahead} يوم هو:**")
-    st.sidebar.markdown(f"- ميلادي: {transported_date.strftime('%Y-%m-%d')}")
-
-    st.sidebar.markdown(f"""
-        <div style="font-size: 24px; font-weight: 700; direction: rtl; margin-top: 5px;">
-            {transported_day_name}
-        </div>
-    """, unsafe_allow_html=True)
+    st.sidebar.markdown(f"- ميلادي: {transported_date.strftime('%Y-%m-%d')} ({transported_day_name})")
 
     transported_hijri = HijriDate(transported_date.year, transported_date.month, transported_date.day, gr=True)
     st.sidebar.markdown(f"- هجري: {transported_hijri.day} / {transported_hijri.month} / {transported_hijri.year}")
 
     dates = get_dates()
 
+    # استدعاء الدالة مع تمرير المتغيرين المطلوبين
     render_time(time_now, today_name)
 
     render_html(
