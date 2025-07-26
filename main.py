@@ -42,12 +42,13 @@ def main():
         """
         <style>
         section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
-            min-width: 240px !important;
-            background-color: #e6f0ff !important;
-            border-radius: 8px !important;
-            border: 1.5px solid #0055cc !important;
-            padding: 5px 10px !important;
-        }
+    min-width: 240px !important;
+    min-height: 40px !important;      /* هذا هو الحد الأدنى للارتفاع */
+    background-color: #e6f0ff !important;
+    border-radius: 8px !important;
+    border: 1.5px solid #0055cc !important;
+    padding: 5px 10px !important;
+}
         section[data-testid="stSidebar"] div[data-baseweb="select"] span {
             font-size: 18px !important;
             color: #003366 !important;
