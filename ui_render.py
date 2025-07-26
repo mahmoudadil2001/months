@@ -3,13 +3,11 @@ from ui_styles import get_styles
 import calendar
 
 def render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now):
-    # حساب عدد أيام الأشهر الميلادية (للسنة الحالية)
     gregorian_days_in_month = [
         calendar.monthrange(dates['gregorian_year'], month)[1]
         for month in range(1, 13)
     ]
 
-    # تقدير أيام الأشهر الهجرية:
     hijri_days_in_month = [30 if i % 2 == 0 else 29 for i in range(12)]
 
     gregorian_months_html = "".join(
@@ -38,6 +36,7 @@ def render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now):
         background-color: white;
         margin-top: 5px;
         display: none;
+        text-align: center; /* جعل النص في الوسط */
       }}
       .scroll-item {{
         padding: 6px 0;
