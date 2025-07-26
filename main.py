@@ -37,23 +37,25 @@ def main():
     days_ar = ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"]
     today_name = days_ar[now.weekday()]
 
-    # CSS لتجميل وتوسيع عرض selectbox في sidebar
+    # إضافة CSS لتحسين مظهر selectbox في الشريط الجانبي
     st.markdown(
         """
         <style>
-        section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
-            min-width: 240px !important;
+        /* تنسيق خلفية selectbox */
+        div[data-baseweb="select"] > div {
             background-color: #e6f0ff !important;
             border-radius: 8px !important;
             border: 1.5px solid #0055cc !important;
             padding: 5px 10px !important;
         }
-        section[data-testid="stSidebar"] div[data-baseweb="select"] span {
+        /* حجم الخط واللون */
+        div[data-baseweb="select"] span {
             font-size: 18px !important;
             color: #003366 !important;
             font-weight: 600 !important;
         }
-        section[data-testid="stSidebar"] div[data-baseweb="select"] svg {
+        /* تغيير شكل السهم */
+        div[data-baseweb="select"] svg {
             fill: #0055cc !important;
         }
         </style>
