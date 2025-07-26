@@ -29,19 +29,13 @@ def main():
 
     dates = get_dates()
 
-    # حساب اليوم الميلادي الحالي والهجري الحالي (الهجري صعب لأنه يعتمد على الحساب القمري، 
-    # فنحن نعتمد تقريباً نفس اليوم)
-    gregorian_day_name = days_ar[dates['gregorian_year'] and now.weekday()]  # اليوم الميلادي الحالي
-    hijri_day_name = "غير معروف"  # لا يمكن حساب اسم اليوم الهجري بدقة هكذا بدون مكتبة إضافية
-
-    # أفضل خيار: نستخدم نفس اليوم الميلادي كبديل اسم اليوم للهجري في العرض.
+    hijri_day_name = "غير معروف"  # تبقى هكذا لعدم وجود حساب دقيق لليوم الهجري
 
     render_time(time_now, today_name)
 
-    # نرسل اسم اليوم الميلادي والهجري (نرسل الميلادي فقط هنا)
     render_html(
         dates, months_en, months_ar1, months_ar2, months_hijri, now,
-        gregorian_day_name=days_ar[dates['gregorian_year'] and now.weekday()],
+        gregorian_day_name=days_ar[now.weekday()],
         hijri_day_name=hijri_day_name
     )
 
