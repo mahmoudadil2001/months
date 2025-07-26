@@ -2,8 +2,7 @@ import streamlit.components.v1 as components
 from ui_styles import get_styles
 import calendar
 
-def render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now,
-                transported_date=None, transported_day_name="", transported_hijri=None):
+def render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now):
     gregorian_days_in_month = [
         calendar.monthrange(dates['gregorian_year'], month)[1]
         for month in range(1, 13)
@@ -21,25 +20,6 @@ def render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now,
         for i, m in enumerate(months_hijri)
     )
 
-    transported_section = ""
-    if transported_date is not None:
-        hijri_month_index = (transported_hijri.month - 1) if transported_hijri else dates['hijri_month_index']
-        hijri_year = transported_hijri.year if transported_hijri else dates['hijri_year']
-
-        transported_section = f"""
-        <div style="margin-top: 30px; text-align: center;">
-            <div style="font-size: 22px; font-weight: bold; direction: ltr;">
-                {transported_date.year}/{transported_date.month:02d}/{transported_date.day:02d} ميلادي
-            </div>
-            <div style="font-size: 22px; font-weight: bold; color: #4CAF50; margin-top: 6px;">
-                {months_hijri[hijri_month_index]} {hijri_year}
-            </div>
-            <div style="font-size: 34px; font-weight: 900; color: #222; margin-top: 15px; direction: rtl;">
-                {transported_day_name}
-            </div>
-        </div>
-        """
-
     html_code = f"""
     {get_styles()}
 
@@ -56,40 +36,10 @@ def render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now,
         background-color: white;
         margin-top: 5px;
         display: none;
-        text-align: center;
+        text-align: center; /* جعل النص في الوسط */
       }}
       .scroll-item {{
         padding: 6px 0;
-      }}
-      .card {{
-        font-weight: 700;
-        font-size: 22px;
-        padding: 10px;
-        border-radius: 10px;
-        background: #f3f3f3;
-        text-align: center;
-      }}
-      .hijri-card {{
-        font-weight: 700;
-        font-size: 22px;
-        padding: 10px;
-        border-radius: 10px;
-        background: #d4f7d4;
-        text-align: center;
-      }}
-      .month-name {{
-        margin-top: 6px;
-        font-weight: 600;
-        font-size: 20px;
-        text-align: center;
-        direction: rtl;
-      }}
-      .months-three {{
-        margin-top: 20px;
-        font-weight: 700;
-        font-size: 20px;
-        text-align: center;
-        direction: rtl;
       }}
     </style>
 
@@ -106,8 +56,6 @@ def render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now,
       </div>
 
       <div class="months-three">{months_ar2[dates['gregorian_month_index']]} - {months_en[dates['gregorian_month_index']]} - {months_ar1[dates['gregorian_month_index']]}</div>
-
-      {transported_section}
 
       <div style="margin-top: 30px;">
         <div id="gregorian" class="scrollable-box">📜 اضغط لعرض الأشهر الميلادية</div>
@@ -137,4 +85,4 @@ def render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now,
     </script>
     """
 
-    components.html(html_code, height=700)
+    components.html(html_code, height=600)
