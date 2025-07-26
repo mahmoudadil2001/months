@@ -1,88 +1,12 @@
-import streamlit.components.v1 as components
-from ui_styles import get_styles
-import calendar
+import streamlit as st
 
-def render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now):
-    gregorian_days_in_month = [
-        calendar.monthrange(dates['gregorian_year'], month)[1]
-        for month in range(1, 13)
-    ]
-
-    hijri_days_in_month = [30 if i % 2 == 0 else 29 for i in range(12)]
-
-    gregorian_months_html = "".join(
-        f'<div class="scroll-item">{i+1}. {ar2} - {en} - {ar1} ({gregorian_days_in_month[i]} يوم)</div>'
-        for i, (ar2, en, ar1) in enumerate(zip(months_ar2, months_en, months_ar1))
+def render_time(time_now, today_name):
+    st.markdown(
+        f"""
+        <div style='text-align: center; margin-bottom: 20px;'>
+            <h1 style='font-size: 48px; margin: 0;'>{time_now}</h1>
+            <h2 style='font-size: 28px; color: #444; margin: 5px 0;'>{today_name}</h2>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
-
-    hijri_months_html = "".join(
-        f'<div class="scroll-item">{i+1}. {m} ({hijri_days_in_month[i]} يوم)</div>'
-        for i, m in enumerate(months_hijri)
-    )
-
-    html_code = f"""
-    {get_styles()}
-
-    <style>
-      .scroll-list {{
-        width: 400px;
-        max-height: 220px;
-        overflow-y: auto;
-        border: 1px solid #ccc;
-        border-radius: 12px;
-        padding: 10px;
-        font-weight: bold;
-        font-size: 18px;
-        background-color: white;
-        margin-top: 5px;
-        display: none;
-        text-align: center; /* جعل النص في الوسط */
-      }}
-      .scroll-item {{
-        padding: 6px 0;
-      }}
-    </style>
-
-    <div class="container">
-
-      <div class="row">
-        <div class="card">{dates['gregorian_year']}/{now.month:02d}/{dates['gregorian_day']:02d}</div>
-        <div class="month-name">{months_ar1[dates['gregorian_month_index']]}</div>
-      </div>
-
-      <div class="row">
-        <div class="hijri-card">{dates['hijri_year']}/{dates['hijri_month_index']+1:02d}/{dates['hijri_day']:02d}</div>
-        <div class="month-name" style="background:#b4f0a4;">{months_hijri[dates['hijri_month_index']]}</div>
-      </div>
-
-      <div class="months-three">{months_ar2[dates['gregorian_month_index']]} - {months_en[dates['gregorian_month_index']]} - {months_ar1[dates['gregorian_month_index']]}</div>
-
-      <div style="margin-top: 30px;">
-        <div id="gregorian" class="scrollable-box">📜 اضغط لعرض الأشهر الميلادية</div>
-        <div id="gregorian-list" class="scroll-list">{gregorian_months_html}</div>
-      </div>
-
-      <div style="margin-top: 20px;">
-        <div id="hijri" class="scrollable-box">📜 اضغط لعرض الأشهر الهجرية</div>
-        <div id="hijri-list" class="scroll-list">{hijri_months_html}</div>
-      </div>
-
-    </div>
-
-    <script>
-      const gregorian = document.getElementById("gregorian");
-      const gregorianList = document.getElementById("gregorian-list");
-      const hijri = document.getElementById("hijri");
-      const hijriList = document.getElementById("hijri-list");
-
-      gregorian.onclick = () => {{
-        gregorianList.style.display = gregorianList.style.display === "none" ? "block" : "none";
-      }};
-
-      hijri.onclick = () => {{
-        hijriList.style.display = hijriList.style.display === "none" ? "block" : "none";
-      }};
-    </script>
-    """
-
-    components.html(html_code, height=600)
