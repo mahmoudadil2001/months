@@ -43,37 +43,38 @@ def main():
         unsafe_allow_html=True
     )
 
-    # 🔹 الأيام حتى اليوم الجديد
-    with st.sidebar.expander("اليوم الحالي حتى اليوم المنقول", expanded=False):
-        total_days = days_ahead + 1
+    # ✅ شرط التحديد إذا كانت الأيام أكبر من 210
+    if days_ahead > 210:
+        st.sidebar.warning("⚠️ لا أستطيع قراءة أكثر من 210 يوم")
+    else:
+        with st.sidebar.expander("اليوم الحالي حتى اليوم المنقول", expanded=False):
+            total_days = days_ahead + 1
 
-        def start_of_week(date):
-            weekday = (date.weekday() + 1) % 7
-            return date - timedelta(days=weekday)
+            def start_of_week(date):
+                weekday = (date.weekday() + 1) % 7
+                return date - timedelta(days=weekday)
 
-        weeks_dict = {}
-        for i in range(total_days):
-            current_day = now + timedelta(days=i)
-            sow = start_of_week(current_day)
-            weeks_dict.setdefault(sow, []).append(current_day)
+            weeks_dict = {}
+            for i in range(total_days):
+                current_day = now + timedelta(days=i)
+                sow = start_of_week(current_day)
+                weeks_dict.setdefault(sow, []).append(current_day)
 
-        sorted_weeks = sorted(weeks_dict.items())
+            sorted_weeks = sorted(weeks_dict.items())
 
-        for week_num, (_, days_list) in enumerate(sorted_weeks, start=1):
-            # 👇 طباعة الأيام أولًا
-            for day_date in days_list:
-                day_name = days_ar[day_date.weekday()]
+            for week_num, (_, days_list) in enumerate(sorted_weeks, start=1):
+                for day_date in days_list:
+                    day_name = days_ar[day_date.weekday()]
+                    st.markdown(
+                        f"<div style='direction:ltr; font-weight:600;'>{day_date.strftime('%Y/%m/%d')} - {day_name}</div>",
+                        unsafe_allow_html=True
+                    )
+
                 st.markdown(
-                    f"<div style='direction:ltr; font-weight:600;'>{day_date.strftime('%Y/%m/%d')} - {day_name}</div>",
+                    f"<div style='font-weight:700; text-align:center; margin-top:4px;'>الأسبوع {week_num}</div>",
                     unsafe_allow_html=True
                 )
-
-            # 👇 بعد الأيام نرسم خط وتظهر كلمة الأسبوع فوقه
-            st.markdown(
-                f"<div style='font-weight:700; text-align:center; margin-top:4px;'>الأسبوع {week_num}</div>",
-                unsafe_allow_html=True
-            )
-            st.markdown("<hr style='margin-top:2px; margin-bottom:10px;'>", unsafe_allow_html=True)
+                st.markdown("<hr style='margin-top:2px; margin-bottom:10px;'>", unsafe_allow_html=True)
 
     dates = get_dates()
     render_time(time_now, today_name)
