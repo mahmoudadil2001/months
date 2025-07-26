@@ -42,7 +42,7 @@ def main():
         """
         <style>
         section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
-    min-width: 240px !important;
+    min-width: 270px !important;
     min-height: 60px !important;      /* هذا هو الحد الأدنى للارتفاع */
     background-color: #e6f0ff !important;
     border-radius: 8px !important;
