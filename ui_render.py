@@ -3,7 +3,7 @@ from ui_styles import get_styles
 import calendar
 
 def render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now,
-                transported_date=None, transported_day_name=""):
+                transported_date=None, transported_day_name="", transported_hijri=None):
     gregorian_days_in_month = [
         calendar.monthrange(dates['gregorian_year'], month)[1]
         for month in range(1, 13)
@@ -21,16 +21,18 @@ def render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now,
         for i, m in enumerate(months_hijri)
     )
 
-    # قسم التاريخ المنقول + اسم اليوم أسفله بشكل واضح وكبير
     transported_section = ""
     if transported_date is not None:
+        hijri_month_index = (transported_hijri.month - 1) if transported_hijri else dates['hijri_month_index']
+        hijri_year = transported_hijri.year if transported_hijri else dates['hijri_year']
+
         transported_section = f"""
         <div style="margin-top: 30px; text-align: center;">
             <div style="font-size: 22px; font-weight: bold; direction: ltr;">
                 {transported_date.year}/{transported_date.month:02d}/{transported_date.day:02d} ميلادي
             </div>
             <div style="font-size: 22px; font-weight: bold; color: #4CAF50; margin-top: 6px;">
-                {months_hijri[(dates['hijri_month_index'])]} {dates['hijri_year']}
+                {months_hijri[hijri_month_index]} {hijri_year}
             </div>
             <div style="font-size: 34px; font-weight: 900; color: #222; margin-top: 15px; direction: rtl;">
                 {transported_day_name}
