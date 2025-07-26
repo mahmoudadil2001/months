@@ -37,42 +37,15 @@ def main():
     days_ar = ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"]
     today_name = days_ar[now.weekday()]
 
-    # إضافة CSS لتحسين مظهر selectbox في الشريط الجانبي
-    st.markdown(
-        """
-        <style>
-        /* تنسيق خلفية selectbox */
-        div[data-baseweb="select"] > div {
-            background-color: #e6f0ff !important;
-            border-radius: 8px !important;
-            border: 1.5px solid #0055cc !important;
-            padding: 5px 10px !important;
-        }
-        /* حجم الخط واللون */
-        div[data-baseweb="select"] span {
-            font-size: 18px !important;
-            color: #003366 !important;
-            font-weight: 600 !important;
-        }
-        /* تغيير شكل السهم */
-        div[data-baseweb="select"] svg {
-            fill: #0055cc !important;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
+    # ======================== القائمة الجانبية مع الأزرار الثلاثة ========================
     st.sidebar.header("حسابات التاريخ والوقت")
 
-    option = st.sidebar.selectbox(
+    option = st.sidebar.radio(
         "اختر العملية",
-        [
-            "بعد كذا يوم (تاريخ ميلادي وهجري ويوم)",
-            "بعد كذا يوم وساعة (تاريخ ويوم وساعة)",
-            "إلى التاريخ والساعة (كم تبقى من يوم وساعة)"
-        ],
-        index=0,
+        ["بعد كذا يوم (تاريخ ميلادي وهجري ويوم)",
+         "بعد كذا يوم وساعة (تاريخ ويوم وساعة)",
+         "إلى التاريخ والساعة (كم تبقى من يوم وساعة)"],
+        index=0
     )
 
     if option == "بعد كذا يوم (تاريخ ميلادي وهجري ويوم)":
@@ -142,7 +115,9 @@ def main():
             except ValueError:
                 st.sidebar.error("⚠️ صيغة التاريخ غير صحيحة.")
 
-    # المحتوى الرئيسي بالصفحة
+    # ======================== نهاية القائمة الجانبية ========================
+
+    # عرض المحتوى الأساسي في الصفحة الرئيسية
     dates = get_dates()
     render_time(time_now, today_name)
     render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now)
