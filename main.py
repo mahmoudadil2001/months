@@ -15,20 +15,18 @@ def main():
     days_ar = ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"]
 
     st.sidebar.header("نقل التاريخ بعدد أيام")
-
     days_ahead = st.sidebar.number_input("أدخل عدد الأيام للنقل إلى الأمام:", min_value=0, step=1)
 
     transported_date = now + timedelta(days=days_ahead)
     transported_day_name = days_ar[transported_date.weekday()]
 
-    # عنوان مع التوجيه من اليسار لليمين
+    # التاريخ مع اتجاه الكتابة من اليسار لليمين
     st.sidebar.markdown(
         f"""<div style='direction: ltr; font-weight: 700; margin-top: 15px;'>
             التاريخ بعد {days_ahead} يوم هو:
         </div>""",
         unsafe_allow_html=True,
     )
-    # التاريخ الميلادي من اليسار لليمين
     st.sidebar.markdown(
         f"""<div style='direction: ltr; font-size: 18px;'>
             - ميلادي: {transported_date.strftime('%Y/%m/%d')}
@@ -36,7 +34,6 @@ def main():
         unsafe_allow_html=True,
     )
 
-    # التاريخ الهجري مع التعامل مع الخطأ
     try:
         hijri_date = HijriDate(transported_date.year, transported_date.month, transported_date.day, gr=True)
         hijri_str = f"- هجري: {hijri_date.day} / {hijri_date.month} / {hijri_date.year}"
@@ -51,7 +48,34 @@ def main():
             unsafe_allow_html=True,
         )
 
-    # اسم اليوم بحجم أكبر وتحته، والاتجاه عربي (من اليمين لليسار)
+    # قائمة الأيام من اليوم الحالي حتى اليوم المنقول (مع تمرير)
+    days_list_html = ""
+    for i in range(days_ahead + 1):  # +1 حتى يشمل اليوم الحالي
+        day_date = now + timedelta(days=i)
+        day_name = days_ar[day_date.weekday()]
+        days_list_html += f"<div style='padding:4px 0;'>{day_date.strftime('%Y/%m/%d')} - {day_name}</div>"
+
+    st.sidebar.markdown(
+        f"""
+        <div style='
+            margin-top: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
+            direction: ltr;
+            font-weight: 600;
+            font-size: 16px;
+            background-color: #f9f9f9;
+        '>
+            {days_list_html}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # اسم اليوم تحت التاريخ بحجم أكبر ومن اليمين لليسار
     st.sidebar.markdown(
         f"""<div style='direction: rtl; font-size: 24px; font-weight: 800; margin-top: 10px; color: #444;'>
             {transported_day_name}
