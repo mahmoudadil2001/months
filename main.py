@@ -43,14 +43,14 @@ def main():
         unsafe_allow_html=True
     )
 
-    # 🔹 إضافة اليوم الجديد فوق القائمة
+    # 🔹 اليوم الجديد بخط كبير
     st.sidebar.markdown(
         f"<div style='text-align:center; font-size:26px; font-weight:900; color:#0055cc; margin:10px 0;'>{transported_day_name}</div>",
         unsafe_allow_html=True
     )
 
     # 🔹 عرض الأيام حتى اليوم الجديد
-    with st.sidebar.expander("من اليوم الحالي حتى اليوم المنقول", expanded=False):
+    with st.sidebar.expander("اليوم الحالي حتى اليوم المنقول", expanded=False):
         total_days = days_ahead + 1
 
         def start_of_week(date):
@@ -66,17 +66,18 @@ def main():
         sorted_weeks = sorted(weeks_dict.items())
 
         for week_num, (_, days_list) in enumerate(sorted_weeks, start=1):
+            # 🔹 كتابة عنوان الأسبوع فوق الأيام
+            st.markdown(
+                f"<div style='font-weight:700; margin:8px 0; border-bottom:2px solid #888;'>الأسبوع {week_num}</div>",
+                unsafe_allow_html=True
+            )
+
             for day_date in days_list:
                 day_name = days_ar[day_date.weekday()]
                 st.markdown(
                     f"<div style='direction:ltr; font-weight:600;'>{day_date.strftime('%Y/%m/%d')} - {day_name}</div>",
                     unsafe_allow_html=True
                 )
-
-            st.markdown(
-                f"<div style='font-weight:700; margin:8px 0; border-top:2px solid #888;'>الأسبوع {week_num}</div>",
-                unsafe_allow_html=True
-            )
 
     # 🔹 الواجهة الرئيسية
     dates = get_dates()
