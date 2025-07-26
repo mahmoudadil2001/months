@@ -50,7 +50,7 @@ def main():
     )
 
     # 🔹 عرض الأيام حتى اليوم الجديد
-    with st.sidebar.expander("اليوم الحالي حتى اليوم المنقول", expanded=False):
+    with st.sidebar.expander("من اليوم الحالي حتى اليوم المنقول", expanded=False):
         total_days = days_ahead + 1
 
         def start_of_week(date):
