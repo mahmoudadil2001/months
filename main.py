@@ -20,92 +20,34 @@ def main():
     transported_date = now + timedelta(days=days_ahead)
     transported_day_name = days_ar[transported_date.weekday()]
 
-    # عرض التواريخ مع اتجاه من اليسار لليمين
     st.sidebar.markdown(
-        f"""<div style='direction: ltr; font-weight: 700; margin-top: 15px;'>
-            التاريخ بعد {days_ahead} يوم هو:
-        </div>""",
+        f"<div style='direction: ltr; font-weight: 700; margin-top: 15px;'>التاريخ بعد {days_ahead} يوم هو:</div>",
         unsafe_allow_html=True,
     )
     st.sidebar.markdown(
-        f"""<div style='direction: ltr; font-size: 18px;'>
-            - ميلادي: {transported_date.strftime('%Y/%m/%d')}
-        </div>""",
+        f"<div style='direction: ltr; font-size: 18px;'>- ميلادي: {transported_date.strftime('%Y/%m/%d')}</div>",
         unsafe_allow_html=True,
     )
 
     try:
         hijri_date = HijriDate(transported_date.year, transported_date.month, transported_date.day, gr=True)
         hijri_str = f"- هجري: {hijri_date.day} / {hijri_date.month} / {hijri_date.year}"
+        st.sidebar.markdown(f"<div style='direction: ltr; font-size: 18px;'>{hijri_str}</div>", unsafe_allow_html=True)
     except Exception:
-        hijri_str = ""
+        pass
 
-    if hijri_str:
-        st.sidebar.markdown(
-            f"""<div style='direction: ltr; font-size: 18px;'>
-                {hijri_str}
-            </div>""",
-            unsafe_allow_html=True,
-        )
-
-    # اسم اليوم الكبير (زر)
+    # إظهار اسم اليوم الكبير
     st.sidebar.markdown(
-        f"""
-        <div id="day-name" style='
-            direction: rtl; 
-            font-size: 24px; 
-            font-weight: 800; 
-            margin-top: 10px; 
-            color: #444; 
-            cursor: pointer;
-            user-select: none;
-        '>
-            {transported_day_name}
-        </div>
-        """,
+        f"<div style='direction: rtl; font-size: 24px; font-weight: 800; margin-top: 10px; color: #444;'>{transported_day_name}</div>",
         unsafe_allow_html=True,
     )
 
-    # قائمة الأيام (مخفية افتراضياً)
-    days_list_html = ""
-    for i in range(days_ahead + 1):  # +1 يشمل اليوم الحالي
-        day_date = now + timedelta(days=i)
-        day_name = days_ar[day_date.weekday()]
-        days_list_html += f"<div style='padding:4px 0;'>{day_date.strftime('%Y/%m/%d')} - {day_name}</div>"
-
-    st.sidebar.markdown(
-        f"""
-        <div id="days-list" style='
-            margin-top: 10px;
-            max-height: 150px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            padding: 10px;
-            direction: ltr;
-            font-weight: 600;
-            font-size: 16px;
-            background-color: #f9f9f9;
-            display: none;
-        '>
-            {days_list_html}
-        </div>
-
-        <script>
-        const dayName = window.parent.document.querySelector('#day-name');
-        const daysList = window.parent.document.querySelector('#days-list');
-
-        dayName.onclick = () => {{
-            if (daysList.style.display === 'none') {{
-                daysList.style.display = 'block';
-            }} else {{
-                daysList.style.display = 'none';
-            }}
-        }};
-        </script>
-        """,
-        unsafe_allow_html=True,
-    )
+    # Expander لإظهار قائمة الأيام من اليوم الحالي حتى اليوم المنقول
+    with st.sidebar.expander("عرض الأيام من اليوم الحالي حتى اليوم المنقول", expanded=False):
+        for i in range(days_ahead + 1):
+            day_date = now + timedelta(days=i)
+            day_name = days_ar[day_date.weekday()]
+            st.markdown(f"<div style='direction: ltr; font-weight: 600;'>{day_date.strftime('%Y/%m/%d')} - {day_name}</div>", unsafe_allow_html=True)
 
     dates = get_dates()
     today_name = days_ar[now.weekday()]
