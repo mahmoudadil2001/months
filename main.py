@@ -6,6 +6,7 @@ from data import get_dates, months_en, months_ar1, months_ar2, months_hijri
 from ui_time import render_time
 from ui_render import render_html
 
+
 def parse_time_input(time_str):
     time_str = time_str.strip()
     if ":" in time_str:
@@ -28,16 +29,18 @@ def parse_time_input(time_str):
             return None
     return None
 
+
 def main():
     st.set_page_config(page_title="التقويم الميلادي والهجري", layout="centered")
 
     now = datetime.utcnow() + timedelta(hours=3)
     time_now = now.strftime("%I:%M %p").lower()
 
-    days_ar = ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"]
+    days_ar = ["الاثنين", "الثلاثاء", "الأربعاء",
+               "الخميس", "الجمعة", "السبت", "الأحد"]
     today_name = days_ar[now.weekday()]
 
-    # CSS لتجميل وتوسيع عرض selectbox في sidebar
+    # ✅ CSS لتنسيق selectbox
     st.markdown(
         """
         <style>
@@ -62,7 +65,6 @@ def main():
         unsafe_allow_html=True,
     )
 
-    # بدون عنوان ولا نص فوق selectbox
     option = st.sidebar.selectbox(
         "",
         [
@@ -71,11 +73,13 @@ def main():
             "إلى التاريخ والساعة (كم تبقى من يوم وساعة)"
         ],
         index=0,
-        key="widget-selectbox"
     )
 
+    # ✅ الزر الأول
     if option == "بعد كذا يوم (تاريخ ميلادي وهجري ويوم)":
-        days_ahead = st.sidebar.number_input("أدخل عدد الأيام للنقل إلى الأمام:", min_value=0, step=1)
+        days_ahead = st.sidebar.number_input(
+            "أدخل عدد الأيام للنقل إلى الأمام:", min_value=0, step=1
+        )
 
         transported_date = now + timedelta(days=days_ahead)
         transported_day_name = days_ar[transported_date.weekday()]
@@ -84,7 +88,8 @@ def main():
         st.sidebar.markdown(f"- ميلادي: {transported_date.strftime('%d-%m-%Y')}")
 
         try:
-            hijri_date = HijriDate(transported_date.year, transported_date.month, transported_date.day, gr=True)
+            hijri_date = HijriDate(
+                transported_date.year, transported_date.month, transported_date.day, gr=True)
             hijri_str = f"{hijri_date.day} / {hijri_date.month} / {hijri_date.year}"
         except Exception:
             hijri_str = "غير متوفر"
@@ -95,7 +100,6 @@ def main():
             unsafe_allow_html=True
         )
 
-        # قائمة اليوم الحالي حتى اليوم المنقول
         if days_ahead <= 210:
             st.sidebar.markdown("### اليوم الحالي حتى اليوم المنقول")
             total_days = days_ahead + 1
@@ -124,13 +128,17 @@ def main():
                     f"<div style='font-weight:700; text-align:center; margin-top:4px;'>الأسبوع {week_num}</div>",
                     unsafe_allow_html=True
                 )
-                st.sidebar.markdown("<hr style='margin-top:2px; margin-bottom:10px;'>", unsafe_allow_html=True)
+                st.sidebar.markdown(
+                    "<hr style='margin-top:2px; margin-bottom:10px;'>", unsafe_allow_html=True)
+
         else:
             st.sidebar.warning("⚠️ لا أستطيع قراءة أكثر من 210 يوم")
 
+    # ✅ الزر الثاني
     elif option == "بعد كذا يوم وساعة (تاريخ ويوم وساعة)":
         days_input = st.sidebar.number_input("أدخل عدد الأيام:", min_value=0, step=1)
-        hours_input = st.sidebar.number_input("أدخل عدد الساعات:", min_value=0, max_value=23, step=1)
+        hours_input = st.sidebar.number_input(
+            "أدخل عدد الساعات:", min_value=0, max_value=23, step=1)
 
         future_time = now + timedelta(days=days_input, hours=hours_input)
         day_name = days_ar[future_time.weekday()]
@@ -142,72 +150,62 @@ def main():
             f"بعد {days_input} يوم و {hours_input} ساعة سيكون اليوم **{day_name}** والتاريخ **{date_str}** والوقت حوالي **{time_str} {period}**"
         )
 
+    # ✅ الزر الثالث
     elif option == "إلى التاريخ والساعة (كم تبقى من يوم وساعة)":
         today_default = now.strftime("%Y/%m/%d")
         time_default = now.strftime("%H:%M")
 
-        date_input_str = st.sidebar.text_input("ادخل التاريخ المستقبلي:", value=today_default)
-
-        # عمودين: واحد لادخال الوقت، والثاني للbadge
-        col_time, col_badge = st.sidebar.columns([4,1])
-        time_input_str = col_time.text_input("ادخل الساعة:", value=time_default)
-
-        # حساب حالة الوقت لعرض AM/PM
-        parsed_time = parse_time_input(time_input_str)
-        am_pm = ""
-        if parsed_time is not None:
-            hour, minute = parsed_time
-            am_pm = "AM" if hour < 12 else "PM"
-        else:
-            am_pm = "??"
-
-        # عرض badge صغير
-        col_badge.markdown(
-            f"""
-            <div style="
-                background-color: #0055cc;
-                color: white;
-                font-weight: bold;
-                border-radius: 5px;
-                padding: 4px 8px;
-                text-align: center;
-                margin-top: 22px;
-                font-size: 14px;
-                ">
-                {am_pm}
-            </div>
-            """,
-            unsafe_allow_html=True
+        date_input_str = st.sidebar.text_input(
+            "ادخل التاريخ المستقبلي:", value=today_default
         )
 
-        if date_input_str and time_input_str:
+        col1, col2 = st.sidebar.columns([3, 1])
+        time_input_str = col1.text_input("ادخل الساعة:", value=time_default)
+
+        parsed_time = parse_time_input(time_input_str)
+
+        # ✅ اختيار AM/PM
+        default_am_pm = "AM" if parsed_time and parsed_time[0] < 12 else "PM"
+        am_pm_choice = col2.selectbox("", ["AM", "PM"], index=0 if default_am_pm == "AM" else 1)
+
+        if parsed_time:
+            hour, minute = parsed_time
+            # تعديل الساعة إذا اختار المستخدم PM وكتب أقل من 12
+            if am_pm_choice == "PM" and hour < 12:
+                hour += 12
+            elif am_pm_choice == "AM" and hour >= 12:
+                hour -= 12
+        else:
+            st.sidebar.error("⚠️ صيغة الوقت غير صحيحة.")
+            hour, minute = None, None
+
+        if date_input_str and hour is not None:
             try:
                 parts = date_input_str.replace("-", "/").split("/")
                 if len(parts) == 3:
                     year, month, day = map(int, parts)
-                    if parsed_time is None:
-                        st.sidebar.error("⚠️ صيغة الوقت غير صحيحة.")
+                    target_datetime = datetime(year, month, day, hour, minute)
+                    diff = target_datetime - now
+                    if diff.total_seconds() > 0:
+                        days_left = diff.days
+                        hours_left = diff.seconds // 3600
+                        minutes_left = (diff.seconds % 3600) // 60
+                        day_name = days_ar[target_datetime.weekday()]
+                        st.sidebar.info(
+                            f"يتبقى **{days_left} يوم** و **{hours_left} ساعة** و **{minutes_left} دقيقة** (يصادف يوم {day_name})"
+                        )
                     else:
-                        hour, minute = parsed_time
-                        target_datetime = datetime(year, month, day, hour, minute)
-                        diff = target_datetime - now
-                        if diff.total_seconds() > 0:
-                            days_left = diff.days
-                            hours_left = diff.seconds // 3600
-                            minutes_left = (diff.seconds % 3600) // 60
-                            day_name = days_ar[target_datetime.weekday()]
-                            st.sidebar.info(f"يتبقى **{days_left} يوم** و **{hours_left} ساعة** و **{minutes_left} دقيقة** (يصادف يوم {day_name})")
-                        else:
-                            st.sidebar.warning("⏳ التاريخ والوقت المحددين قد مرا بالفعل.")
+                        st.sidebar.warning("⏳ التاريخ والوقت المحددين قد مرا بالفعل.")
                 else:
                     st.sidebar.error("⚠️ صيغة التاريخ غير صحيحة.")
             except ValueError:
                 st.sidebar.error("⚠️ صيغة التاريخ غير صحيحة.")
 
-    # المحتوى الرئيسي بالصفحة
+    # ✅ المحتوى الرئيسي
     dates = get_dates()
     render_time(time_now, today_name)
     render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now)
+
 
 if __name__ == "__main__":
     main()
