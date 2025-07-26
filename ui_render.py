@@ -36,7 +36,7 @@ def render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now):
         background-color: white;
         margin-top: 5px;
         display: none;
-        text-align: center; /* جعل النص في الوسط */
+        text-align: center;
       }}
       .scroll-item {{
         padding: 6px 0;
