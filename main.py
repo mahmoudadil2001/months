@@ -23,9 +23,12 @@ def main():
 
     transported_date = now + timedelta(days=days_ahead)
 
+    # ✅ حساب اسم اليوم بعد النقل
+    transported_day_name = days_ar[transported_date.weekday()]
+
     # ✅ عرض التاريخ المنقول في الشريط الجانبي
     st.sidebar.markdown(f"**التاريخ بعد {days_ahead} يوم هو:**")
-    st.sidebar.markdown(f"- ميلادي: {transported_date.strftime('%Y-%m-%d')}")
+    st.sidebar.markdown(f"- ميلادي: {transported_date.strftime('%Y-%m-%d')} ({transported_day_name})")
 
     # ✅ حساب التاريخ الهجري للتاريخ المنقول
     hijri_date = HijriDate(transported_date.year, transported_date.month, transported_date.day, gr=True)
