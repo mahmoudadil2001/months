@@ -49,6 +49,7 @@ def main():
         index=0,
     )
 
+    # --------------------- الزر الأول ----------------------
     if option == "بعد كذا يوم (تاريخ ميلادي وهجري ويوم)":
         days_ahead = st.sidebar.number_input("أدخل عدد الأيام للنقل إلى الأمام:", min_value=0, step=1)
 
@@ -102,6 +103,7 @@ def main():
         else:
             st.sidebar.warning("⚠️ لا أستطيع قراءة أكثر من 210 يوم")
 
+    # --------------------- الزر الثاني ----------------------
     elif option == "بعد كذا يوم وساعة (تاريخ ويوم وساعة)":
         days_input = st.sidebar.number_input("أدخل عدد الأيام:", min_value=0, step=1)
         hours_input = st.sidebar.number_input("أدخل عدد الساعات:", min_value=0, max_value=23, step=1)
@@ -116,6 +118,7 @@ def main():
             f"بعد {days_input} يوم و {hours_input} ساعة سيكون اليوم **{day_name}** والتاريخ **{date_str}** والوقت حوالي **{time_str} {period}**"
         )
 
+    # --------------------- الزر الثالث ----------------------
     elif option == "إلى التاريخ والساعة (كم تبقى من يوم وساعة)":
         today_default = now.strftime("%Y/%m/%d")
         time_default = now.strftime("%H:%M")
@@ -148,7 +151,14 @@ def main():
                             hours_left = diff.seconds // 3600
                             minutes_left = (diff.seconds % 3600) // 60
                             day_name = days_ar[target_datetime.weekday()]
-                            st.sidebar.info(f"يتبقى **{days_left} يوم** و **{hours_left} ساعة** و **{minutes_left} دقيقة** (يصادف يوم {day_name})")
+
+                            period = "صباحًا" if target_datetime.hour < 12 else "مساءً"
+                            time_display = target_datetime.strftime("%I:%M").lstrip("0")
+
+                            st.sidebar.info(
+                                f"يتبقى **{days_left} يوم** و **{hours_left} ساعة** و **{minutes_left} دقيقة**\n"
+                                f"(يصادف اليوم {day_name} الساعة {time_display} {period})"
+                            )
                         else:
                             st.sidebar.warning("⏳ التاريخ والوقت المحددين قد مرا بالفعل.")
                 else:
@@ -156,6 +166,7 @@ def main():
             except ValueError:
                 st.sidebar.error("⚠️ صيغة التاريخ غير صحيحة.")
 
+    # --------------------- باقي الصفحة ----------------------
     dates = get_dates()
     render_time(time_now, today_name)
     render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now)
