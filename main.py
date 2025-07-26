@@ -41,14 +41,28 @@ def main():
     st.markdown(
         """
         <style>
+        section[data-testid="stSidebar"] h2 {
+            font-size: 24px !important;
+            font-weight: 700 !important;
+            margin-bottom: 10px !important;
+            color: #0055cc !important;
+            text-align: center;
+        }
+        section[data-testid="stSidebar"] label[for="widget-selectbox"] {
+            font-size: 20px !important;
+            font-weight: 600 !important;
+            margin-bottom: 8px !important;
+            display: block;
+            color: #003366 !important;
+        }
         section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
-    min-width: 250px !important;
-    min-height: 60px !important;      /* هذا هو الحد الأدنى للارتفاع */
-    background-color: #e6f0ff !important;
-    border-radius: 8px !important;
-    border: 1.5px solid #0055cc !important;
-    padding: 5px 10px !important;
-}
+            min-width: 250px !important;
+            min-height: 60px !important;
+            background-color: #e6f0ff !important;
+            border-radius: 8px !important;
+            border: 1.5px solid #0055cc !important;
+            padding: 5px 10px !important;
+        }
         section[data-testid="stSidebar"] div[data-baseweb="select"] span {
             font-size: 18px !important;
             color: #003366 !important;
@@ -62,8 +76,10 @@ def main():
         unsafe_allow_html=True,
     )
 
-    st.sidebar.header("حسابات التاريخ والوقت")
+    # العنوان الرئيسي في الشريط الجانبي
+    st.sidebar.markdown("<h2>حسابات التاريخ والوقت</h2>", unsafe_allow_html=True)
 
+    # اختيار العملية
     option = st.sidebar.selectbox(
         "اختر العملية",
         [
@@ -72,6 +88,7 @@ def main():
             "إلى التاريخ والساعة (كم تبقى من يوم وساعة)"
         ],
         index=0,
+        key="widget-selectbox"
     )
 
     if option == "بعد كذا يوم (تاريخ ميلادي وهجري ويوم)":
