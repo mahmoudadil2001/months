@@ -75,13 +75,7 @@ def main():
         """,
         unsafe_allow_html=True,
     )
-
-    # العنوان الرئيسي في الشريط الجانبي
-    st.sidebar.markdown("<h2>حسابات التاريخ والوقت</h2>", unsafe_allow_html=True)
-
-    # اختيار العملية
     option = st.sidebar.selectbox(
-        "اختر العملية",
         [
             "بعد كذا يوم (تاريخ ميلادي وهجري ويوم)",
             "بعد كذا يوم وساعة (تاريخ ويوم وساعة)",
