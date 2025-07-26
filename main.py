@@ -43,7 +43,7 @@ def main():
     )
 
     # Expander لإظهار قائمة الأيام من اليوم الحالي حتى اليوم المنقول
-    with st.sidebar.expander("عرض الأيام من اليوم الحالي حتى اليوم المنقول", expanded=False):
+    with st.sidebar.expander("اليوم الحالي حتى اليوم المنقول", expanded=False):
         for i in range(days_ahead + 1):
             day_date = now + timedelta(days=i)
             day_name = days_ar[day_date.weekday()]
