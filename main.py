@@ -39,7 +39,8 @@ def main():
     render_html(
         dates, months_en, months_ar1, months_ar2, months_hijri, now,
         transported_date=transported_date,
-        transported_day_name=transported_day_name
+        transported_day_name=transported_day_name,
+        transported_hijri=transported_hijri
     )
 
 if __name__ == "__main__":
