@@ -22,16 +22,19 @@ def main():
     transported_day_name = days_ar[transported_date.weekday()]
 
     st.sidebar.markdown(f"**التاريخ بعد {days_ahead} يوم هو:**")
+
+    # عرض التاريخ الميلادي
     st.sidebar.markdown(f"- ميلادي: {transported_date.strftime('%Y-%m-%d')}")
 
-    st.sidebar.markdown(f"""
-        <div style="font-size: 24px; font-weight: 700; direction: rtl; margin-top: 5px;">
-            {transported_day_name}
-        </div>
-    """, unsafe_allow_html=True)
-
+    # عرض التاريخ الهجري
     transported_hijri = HijriDate(transported_date.year, transported_date.month, transported_date.day, gr=True)
     st.sidebar.markdown(f"- هجري: {transported_hijri.day} / {transported_hijri.month} / {transported_hijri.year}")
+
+    # عرض اسم اليوم بخط كبير تحت التاريخين
+    st.sidebar.markdown(
+        f'<div style="font-size: 28px; font-weight: 800; color: #222; direction: rtl; margin-top: 10px;">{transported_day_name}</div>',
+        unsafe_allow_html=True
+    )
 
     dates = get_dates()
 
