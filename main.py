@@ -9,29 +9,24 @@ from ui_render import render_html
 def main():
     st.set_page_config(page_title="التقويم الميلادي والهجري", layout="centered")
 
-    # الوقت الحالي
     now = datetime.utcnow() + timedelta(hours=3)
     time_now = now.strftime("%I:%M %p").lower()
 
-    # أسماء الأيام بالعربي
     days_ar = ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"]
     today_name = days_ar[now.weekday()]
 
-    # 🔹 التحكم في نقل التاريخ
     st.sidebar.header("نقل التاريخ بعدد أيام")
     days_ahead = st.sidebar.number_input("أدخل عدد الأيام للنقل إلى الأمام:", min_value=0, step=1)
 
     transported_date = now + timedelta(days=days_ahead)
     transported_day_name = days_ar[transported_date.weekday()]
 
-    # 🔹 عرض التاريخ الميلادي
     st.sidebar.markdown(f"**التاريخ بعد {days_ahead} يوم هو:**")
     st.sidebar.markdown(
         f"<div style='direction:ltr;'>- ميلادي: {transported_date.strftime('%Y/%m/%d')}</div>",
         unsafe_allow_html=True
     )
 
-    # 🔹 حساب التاريخ الهجري
     try:
         hijri_date = HijriDate(transported_date.year, transported_date.month, transported_date.day, gr=True)
         hijri_str = f"{hijri_date.day} / {hijri_date.month} / {hijri_date.year}"
@@ -43,13 +38,12 @@ def main():
         unsafe_allow_html=True
     )
 
-    # 🔹 اليوم الجديد بخط كبير
     st.sidebar.markdown(
         f"<div style='text-align:center; font-size:26px; font-weight:900; color:#0055cc; margin:10px 0;'>{transported_day_name}</div>",
         unsafe_allow_html=True
     )
 
-    # 🔹 عرض الأيام حتى اليوم الجديد
+    # 🔹 الأيام حتى اليوم الجديد
     with st.sidebar.expander("اليوم الحالي حتى اليوم المنقول", expanded=False):
         total_days = days_ahead + 1
 
@@ -66,12 +60,7 @@ def main():
         sorted_weeks = sorted(weeks_dict.items())
 
         for week_num, (_, days_list) in enumerate(sorted_weeks, start=1):
-            # 🔹 كتابة عنوان الأسبوع فوق الأيام
-            st.markdown(
-                f"<div style='font-weight:700; margin:8px 0; border-bottom:2px solid #888;'>الأسبوع {week_num}</div>",
-                unsafe_allow_html=True
-            )
-
+            # 👇 طباعة الأيام أولًا
             for day_date in days_list:
                 day_name = days_ar[day_date.weekday()]
                 st.markdown(
@@ -79,7 +68,13 @@ def main():
                     unsafe_allow_html=True
                 )
 
-    # 🔹 الواجهة الرئيسية
+            # 👇 بعد الأيام نرسم خط وتظهر كلمة الأسبوع فوقه
+            st.markdown(
+                f"<div style='font-weight:700; text-align:center; margin-top:4px;'>الأسبوع {week_num}</div>",
+                unsafe_allow_html=True
+            )
+            st.markdown("<hr style='margin-top:2px; margin-bottom:10px;'>", unsafe_allow_html=True)
+
     dates = get_dates()
     render_time(time_now, today_name)
     render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now)
