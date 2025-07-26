@@ -1,40 +1,51 @@
 import streamlit as st
 from datetime import datetime, timedelta
-from ummalqura.hijri_date import HijriDate
 
-from data import get_dates, months_en, months_ar1, months_ar2, months_hijri
-from ui_time import render_time
-from ui_render import render_html
+# إذا كانت مكتبة التحويل للهجري موجودة
+try:
+    from hijri_converter import convert
+    hijri_available = True
+except ImportError:
+    hijri_available = False
 
-def main():
-    st.set_page_config(page_title="التقويم الميلادي والهجري", layout="centered")
+st.set_page_config(page_title="حاسبة التاريخ", layout="centered")
+st.title("🗓️ حاسبة اليوم والتاريخ")
 
-    # ✅ الحصول على الوقت الحالي بتوقيت العراق (+3 ساعات عن UTC)
-    now = datetime.utcnow() + timedelta(hours=3)
-    time_now = now.strftime("%I:%M %p").lower()
+# الوقت الحالي
+now = datetime.now()
+current_time = now.strftime("%H:%M:%S")
+current_day = now.strftime("%A")
+current_date = now.strftime("%Y-%m-%d")
 
-    # 🔹 قسم التحكم في نقل التاريخ بعدد أيام
-    st.sidebar.header("نقل التاريخ بعدد أيام")
-    days_ahead = st.sidebar.number_input("أدخل عدد الأيام للنقل إلى الأمام:", min_value=0, step=1)
+st.markdown(f"### 🕒 الوقت الحالي: **{current_time}**")
+st.markdown(f"### 📆 اليوم: **{current_day}**")
+st.markdown(f"### 📅 التاريخ الميلادي: **{current_date}**")
 
-    transported_date = now + timedelta(days=days_ahead)
+if hijri_available:
+    hijri_today = convert.Gregorian(now.year, now.month, now.day).to_hijri()
+    st.markdown(f"### 🕌 التاريخ الهجري: **{hijri_today.day} / {hijri_today.month} / {hijri_today.year}**")
+else:
+    st.warning("⚠️ مكتبة hijri_converter غير متوفرة لعرض التاريخ الهجري.")
 
-    # ✅ عرض التاريخ المنقول في الشريط الجانبي
-    st.sidebar.markdown(f"**التاريخ بعد {days_ahead} يوم هو:**")
-    st.sidebar.markdown(f"- ميلادي: {transported_date.strftime('%Y-%m-%d')}")
+st.markdown("---")
+st.subheader("🔮 احسب اليوم والتاريخ بعد عدد من الأيام")
 
-    # ✅ حساب التاريخ الهجري للتاريخ المنقول
-    hijri_date = HijriDate(transported_date.year, transported_date.month, transported_date.day, gr=True)
-    st.sidebar.markdown(f"- هجري: {hijri_date.day} / {hijri_date.month} / {hijri_date.year}")
+# إدخال عدد الأيام
+days = st.number_input("أدخل عدد الأيام من اليوم:", min_value=0, value=0, step=1)
 
-    # ✅ جلب التواريخ الحالية لعرضها في الواجهة
-    dates = get_dates()
+# التاريخ المستقبلي
+future_date = now + timedelta(days=days)
+future_day = future_date.strftime("%A")
+future_date_str = future_date.strftime("%Y-%m-%d")
 
-    # ✅ عرض الوقت في أعلى الصفحة
-    render_time(time_now)
+if hijri_available:
+    hijri_future = convert.Gregorian(future_date.year, future_date.month, future_date.day).to_hijri()
+    hijri_str = f"{hijri_future.day} / {hijri_future.month} / {hijri_future.year}"
+else:
+    hijri_str = "غير متوفّر (ثبّت hijri_converter)"
 
-    # ✅ عرض باقي عناصر واجهة المستخدم
-    render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now)
-
-if __name__ == "__main__":
-    main()
+# عرض النتائج
+st.success(f"📍 بعد {days} يوم:")
+st.markdown(f"- اليوم سيكون: **{future_day}**")
+st.markdown(f"- التاريخ الميلادي: **{future_date_str}**")
+st.markdown(f"- التاريخ الهجري: **{hijri_str}**")
