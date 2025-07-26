@@ -2,7 +2,7 @@ import streamlit.components.v1 as components
 from ui_styles import get_styles
 import calendar
 
-def render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now):
+def render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now, gregorian_day_name="", hijri_day_name=""):
     gregorian_days_in_month = [
         calendar.monthrange(dates['gregorian_year'], month)[1]
         for month in range(1, 13)
@@ -41,17 +41,25 @@ def render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now):
       .scroll-item {{
         padding: 6px 0;
       }}
+      .day-name {{
+        font-size: 20px;
+        color: #555;
+        margin-top: 2px;
+        font-weight: 600;
+      }}
     </style>
 
     <div class="container">
 
       <div class="row">
         <div class="card">{dates['gregorian_year']}/{now.month:02d}/{dates['gregorian_day']:02d}</div>
+        <div class="day-name">{gregorian_day_name}</div>
         <div class="month-name">{months_ar1[dates['gregorian_month_index']]}</div>
       </div>
 
       <div class="row">
         <div class="hijri-card">{dates['hijri_year']}/{dates['hijri_month_index']+1:02d}/{dates['hijri_day']:02d}</div>
+        <div class="day-name">{hijri_day_name}</div>
         <div class="month-name" style="background:#b4f0a4;">{months_hijri[dates['hijri_month_index']]}</div>
       </div>
 
