@@ -20,7 +20,7 @@ def main():
     transported_date = now + timedelta(days=days_ahead)
     transported_day_name = days_ar[transported_date.weekday()]
 
-    # التاريخ مع اتجاه الكتابة من اليسار لليمين
+    # عرض التواريخ مع اتجاه من اليسار لليمين
     st.sidebar.markdown(
         f"""<div style='direction: ltr; font-weight: 700; margin-top: 15px;'>
             التاريخ بعد {days_ahead} يوم هو:
@@ -48,17 +48,35 @@ def main():
             unsafe_allow_html=True,
         )
 
-    # قائمة الأيام من اليوم الحالي حتى اليوم المنقول (مع تمرير)
+    # اسم اليوم الكبير (زر)
+    st.sidebar.markdown(
+        f"""
+        <div id="day-name" style='
+            direction: rtl; 
+            font-size: 24px; 
+            font-weight: 800; 
+            margin-top: 10px; 
+            color: #444; 
+            cursor: pointer;
+            user-select: none;
+        '>
+            {transported_day_name}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # قائمة الأيام (مخفية افتراضياً)
     days_list_html = ""
-    for i in range(days_ahead + 1):  # +1 حتى يشمل اليوم الحالي
+    for i in range(days_ahead + 1):  # +1 يشمل اليوم الحالي
         day_date = now + timedelta(days=i)
         day_name = days_ar[day_date.weekday()]
         days_list_html += f"<div style='padding:4px 0;'>{day_date.strftime('%Y/%m/%d')} - {day_name}</div>"
 
     st.sidebar.markdown(
         f"""
-        <div style='
-            margin-top: 20px;
+        <div id="days-list" style='
+            margin-top: 10px;
             max-height: 150px;
             overflow-y: auto;
             border: 1px solid #ccc;
@@ -68,18 +86,24 @@ def main():
             font-weight: 600;
             font-size: 16px;
             background-color: #f9f9f9;
+            display: none;
         '>
             {days_list_html}
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
 
-    # اسم اليوم تحت التاريخ بحجم أكبر ومن اليمين لليسار
-    st.sidebar.markdown(
-        f"""<div style='direction: rtl; font-size: 24px; font-weight: 800; margin-top: 10px; color: #444;'>
-            {transported_day_name}
-        </div>""",
+        <script>
+        const dayName = window.parent.document.querySelector('#day-name');
+        const daysList = window.parent.document.querySelector('#days-list');
+
+        dayName.onclick = () => {{
+            if (daysList.style.display === 'none') {{
+                daysList.style.display = 'block';
+            }} else {{
+                daysList.style.display = 'none';
+            }}
+        }};
+        </script>
+        """,
         unsafe_allow_html=True,
     )
 
