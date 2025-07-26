@@ -33,19 +33,28 @@ def main():
 
     with st.sidebar.expander("من اليوم الحالي حتى اليوم المنقول", expanded=False):
         total_days = days_ahead + 1
-        weeks = (total_days - 1) // 7
+        
+        # دالة لمساعدتك على تحديد بداية الأسبوع (الأحد) لكل يوم
+        def start_of_week(date):
+            # weekday(): الاثنين=0 ... الأحد=6
+            # نريد الأحد=0، لذا نحول الأحد ليكون بداية الأسبوع
+            weekday = (date.weekday() + 1) % 7  # الأحد = 0, الاثنين=1, ...
+            return date - timedelta(days=weekday)
 
-        for i in range(min(7, total_days)):
-            day_date = now + timedelta(days=i)
-            day_name = days_ar[day_date.weekday()]
-            st.markdown(f"<div style='direction: ltr; font-weight: 600;'>{day_date.strftime('%Y/%m/%d')} - {day_name}</div>", unsafe_allow_html=True)
+        # جمع الأيام في قوائم حسب الأسبوع
+        weeks_dict = {}
+        for i in range(total_days):
+            current_day = now + timedelta(days=i)
+            sow = start_of_week(current_day)
+            weeks_dict.setdefault(sow, []).append(current_day)
 
-        for w in range(weeks):
-            start_day = 7 + w * 7
-            end_day = min(start_day + 7, total_days)
-            st.markdown(f"<div style='font-weight: 700; margin-top: 10px; border-bottom: 2px solid #888;'>الأسبوع {w + 1}</div>", unsafe_allow_html=True)
-            for i in range(start_day, end_day):
-                day_date = now + timedelta(days=i)
+        # ترتيب الأسابيع تصاعديًا حسب تاريخ بداية الأسبوع
+        sorted_weeks = sorted(weeks_dict.items())
+
+        for week_num, (week_start, days_list) in enumerate(sorted_weeks, start=1):
+            # عنوان الأسبوع فوق الخط
+            st.markdown(f"<div style='font-weight: 700; margin-top: 10px; border-bottom: 2px solid #888;'>الأسبوع {week_num} (ابتداءً من {week_start.strftime('%Y/%m/%d')})</div>", unsafe_allow_html=True)
+            for day_date in days_list:
                 day_name = days_ar[day_date.weekday()]
                 st.markdown(f"<div style='direction: ltr; font-weight: 600;'>{day_date.strftime('%Y/%m/%d')} - {day_name}</div>", unsafe_allow_html=True)
 
