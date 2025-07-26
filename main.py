@@ -12,6 +12,7 @@ def main():
     now = datetime.utcnow() + timedelta(hours=3)
     time_now = now.strftime("%I:%M %p").lower()
 
+    # قائمة أسماء الأيام العربية (ترتيب الاثنين=0 ... الأحد=6)
     days_ar = ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"]
     today_name = days_ar[now.weekday()]
 
@@ -29,6 +30,7 @@ def main():
 
     dates = get_dates()
 
+    # استدعاء الدالة مع تمرير المتغيرين المطلوبين
     render_time(time_now, today_name)
 
     render_html(
