@@ -41,20 +41,6 @@ def main():
     st.markdown(
         """
         <style>
-        section[data-testid="stSidebar"] h2 {
-            font-size: 24px !important;
-            font-weight: 700 !important;
-            margin-bottom: 10px !important;
-            color: #0055cc !important;
-            text-align: center;
-        }
-        section[data-testid="stSidebar"] label[for="widget-selectbox"] {
-            font-size: 20px !important;
-            font-weight: 600 !important;
-            margin-bottom: 8px !important;
-            display: block;
-            color: #003366 !important;
-        }
         section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
             min-width: 250px !important;
             min-height: 60px !important;
@@ -76,12 +62,9 @@ def main():
         unsafe_allow_html=True,
     )
 
-    # العنوان الرئيسي في الشريط الجانبي
-    st.sidebar.markdown("<h2>حسابات التاريخ والوقت</h2>", unsafe_allow_html=True)
-
-    # اختيار العملية
+    # بدون عنوان ولا نص فوق selectbox
     option = st.sidebar.selectbox(
-        "اختر العملية",
+        "",
         [
             "بعد كذا يوم (تاريخ ميلادي وهجري ويوم)",
             "بعد كذا يوم وساعة (تاريخ ويوم وساعة)",
