@@ -1,42 +1,10 @@
 import streamlit as st
 from datetime import datetime, timedelta
-from ummalqura.hijri_date import HijriDate
-import dateutil.relativedelta
 
+from date_utils import get_hijri_date_safe, calc_date_difference
 from data import get_dates, months_en, months_ar1, months_ar2, months_hijri
 from ui_time import render_time
 from ui_render import render_html
-
-
-def parse_time_input(time_str):
-    time_str = time_str.strip()
-    if ":" in time_str:
-        parts = time_str.split(":")
-        if len(parts) == 2:
-            try:
-                hour = int(parts[0])
-                minute = int(parts[1])
-                if 0 <= hour < 24 and 0 <= minute < 60:
-                    return hour, minute
-            except:
-                return None
-        return None
-    else:
-        try:
-            hour = int(time_str)
-            if 0 <= hour < 24:
-                return hour, 0
-        except:
-            return None
-    return None
-
-
-def get_hijri_date_safe(dt):
-    try:
-        hijri_date = HijriDate(dt.year, dt.month, dt.day, gr=True)
-        return f"{hijri_date.year}/{hijri_date.month}/{hijri_date.day} (أم القرى)"
-    except Exception:
-        return "غير متوفر (خارج نطاق الحساب)"
 
 
 def main():
@@ -68,9 +36,10 @@ def main():
         st.sidebar.markdown(f"**التاريخ بعد {days_ahead} يوم هو:**")
         st.sidebar.markdown(f"- ميلادي: {transported_date.strftime('%d-%m-%Y')}")
 
+        # حساب هجري آمن
         hijri_str = get_hijri_date_safe(transported_date)
-
         st.sidebar.markdown(f"- هجري: {hijri_str}")
+
         st.sidebar.markdown(
             f"<div style='text-align:center; font-size:20px; font-weight:900; color:#0055cc; margin:10px 0;'>{transported_day_name}</div>",
             unsafe_allow_html=True
@@ -137,6 +106,29 @@ def main():
                 parts = date_input_str.replace("-", "/").split("/")
                 if len(parts) == 3:
                     year, month, day = map(int, parts)
+                    # نفس دالة parse_time_input يمكنك نقلها للملف utils أو هنا إذا تريد
+                    def parse_time_input(time_str):
+                        time_str = time_str.strip()
+                        if ":" in time_str:
+                            parts = time_str.split(":")
+                            if len(parts) == 2:
+                                try:
+                                    hour = int(parts[0])
+                                    minute = int(parts[1])
+                                    if 0 <= hour < 24 and 0 <= minute < 60:
+                                        return hour, minute
+                                except:
+                                    return None
+                            return None
+                        else:
+                            try:
+                                hour = int(time_str)
+                                if 0 <= hour < 24:
+                                    return hour, 0
+                            except:
+                                return None
+                        return None
+
                     parsed_time = parse_time_input(time_input_str)
                     if parsed_time is None:
                         st.sidebar.error("⚠️ صيغة الوقت غير صحيحة.")
@@ -185,54 +177,37 @@ def main():
             dt1 = datetime.combine(date1, time1)
             dt2 = datetime.combine(date2, time2)
 
-            diff_seconds = (dt2 - dt1).total_seconds()
-            direction = "بعد" if diff_seconds >= 0 else "قبل"
-
-            import dateutil.relativedelta
-
-            if diff_seconds >= 0:
-                diff = dateutil.relativedelta.relativedelta(dt2, dt1)
-            else:
-                diff = dateutil.relativedelta.relativedelta(dt1, dt2)
-
-            years = diff.years
-            months = diff.months
-            days = diff.days
-            hours = diff.hours
-            minutes = diff.minutes
-
-            total_days = abs((dt2 - dt1).days)
+            diff_info = calc_date_difference(dt1, dt2)
 
             parts = []
-            if years > 0:
-                parts.append(f"**{years} سنة**")
-            if months > 0:
-                parts.append(f"**{months} شهر**")
-            if days > 0:
-                parts.append(f"**{days} يوم**")
-            if hours > 0:
-                parts.append(f"**{hours} ساعة**")
-            if minutes > 0:
-                parts.append(f"**{minutes} دقيقة**")
+            if diff_info["years"] > 0:
+                parts.append(f"**{diff_info['years']} سنة**")
+            if diff_info["months"] > 0:
+                parts.append(f"**{diff_info['months']} شهر**")
+            if diff_info["days"] > 0:
+                parts.append(f"**{diff_info['days']} يوم**")
+            if diff_info["hours"] > 0:
+                parts.append(f"**{diff_info['hours']} ساعة**")
+            if diff_info["minutes"] > 0:
+                parts.append(f"**{diff_info['minutes']} دقيقة**")
 
             if not parts:
                 parts.append("0 دقيقة")
 
-            result_text = f"{direction} " + " و ".join(parts) + f"\n(الإجمالي: {total_days} يوم)"
+            result_text = f"{diff_info['direction']} " + " و ".join(parts) + f"\n(الإجمالي: {diff_info['total_days']} يوم)"
 
             st.sidebar.success(result_text)
 
-            # عرض يوم الأسبوع والوقت بنمط 12 ساعة للتاريخ الثاني
             day_name = days_ar[dt2.weekday()]
             period = "صباحًا" if dt2.hour < 12 else "مساءً"
             time_display = dt2.strftime("%I:%M").lstrip("0")
 
             st.sidebar.markdown(f"يصادف اليوم: **{day_name}** والساعة: **{time_display} {period}**")
 
-            # حساب وعرض التاريخ الهجري للتاريخ الثاني
             hijri_str = get_hijri_date_safe(dt2)
             st.sidebar.markdown(f"التاريخ الهجري: **{hijri_str}**")
 
+    # باقي الصفحة الرئيسية
     dates = get_dates()
     render_time(time_now, today_name)
     render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now)
