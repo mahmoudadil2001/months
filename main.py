@@ -1,5 +1,5 @@
 import streamlit as st
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from ummalqura.hijri_date import HijriDate
 import dateutil.relativedelta
 
@@ -171,10 +171,20 @@ def main():
 
         st.sidebar.markdown("### 📆 اختر التاريخين")
 
-        date1 = st.sidebar.date_input("التاريخ الأول", value=default_date)
+        date1 = st.sidebar.date_input(
+            "التاريخ الأول",
+            value=default_date,
+            min_value=date(1900, 1, 1),
+            max_value=date(2100, 12, 31)
+        )
         time1 = st.sidebar.time_input("الوقت الأول", value=default_time)
 
-        date2 = st.sidebar.date_input("التاريخ الثاني", value=default_date)
+        date2 = st.sidebar.date_input(
+            "التاريخ الثاني",
+            value=default_date,
+            min_value=date(1900, 1, 1),
+            max_value=date(2100, 12, 31)
+        )
         time2 = st.sidebar.time_input("الوقت الثاني", value=default_time)
 
         if st.sidebar.button("احسب الفرق"):
