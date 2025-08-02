@@ -20,7 +20,6 @@ def parse_time_input(time_str):
                     return hour, minute
             except:
                 return None
-        return None
     else:
         try:
             hour = int(time_str)
@@ -51,6 +50,7 @@ def main():
         index=0,
     )
 
+    # ✅ الخيار 1: بعد كذا يوم
     if option == "بعد كذا يوم (تاريخ ميلادي وهجري ويوم)":
         days_ahead = st.sidebar.number_input("أدخل عدد الأيام للنقل إلى الأمام:", min_value=0, step=1)
 
@@ -62,9 +62,9 @@ def main():
 
         try:
             hijri_date = HijriDate(transported_date.year, transported_date.month, transported_date.day, gr=True)
-            hijri_str = f"{hijri_date.day} / {hijri_date.month} / {hijri_date.year}"
-        except Exception:
-            hijri_str = "غير متوفر"
+            hijri_str = f"{hijri_date.day}/{hijri_date.month}/{hijri_date.year}"
+        except:
+            hijri_str = get_hijri_date(transported_date)
 
         st.sidebar.markdown(f"- هجري: {hijri_str}")
         st.sidebar.markdown(
@@ -72,38 +72,7 @@ def main():
             unsafe_allow_html=True
         )
 
-        if days_ahead <= 210:
-            st.sidebar.markdown("### اليوم الحالي حتى اليوم المنقول")
-            total_days = days_ahead + 1
-
-            def start_of_week(date):
-                weekday = (date.weekday() + 1) % 7
-                return date - timedelta(days=weekday)
-
-            weeks_dict = {}
-            for i in range(total_days):
-                current_day = now + timedelta(days=i)
-                sow = start_of_week(current_day)
-                weeks_dict.setdefault(sow, []).append(current_day)
-
-            sorted_weeks = sorted(weeks_dict.items())
-
-            for week_num, (_, days_list) in enumerate(sorted_weeks, start=1):
-                for day_date in days_list:
-                    day_name = days_ar[day_date.weekday()]
-                    st.sidebar.markdown(
-                        f"<div style='direction:ltr; font-weight:600;'>{day_date.strftime('%Y/%m/%d')} - {day_name}</div>",
-                        unsafe_allow_html=True
-                    )
-
-                st.sidebar.markdown(
-                    f"<div style='font-weight:700; text-align:center; margin-top:4px;'>الأسبوع {week_num}</div>",
-                    unsafe_allow_html=True
-                )
-                st.sidebar.markdown("<hr style='margin-top:2px; margin-bottom:10px;'>", unsafe_allow_html=True)
-        else:
-            st.sidebar.warning("⚠️ لا أستطيع قراءة أكثر من 210 يوم")
-
+    # ✅ الخيار 2: بعد كذا يوم وساعة
     elif option == "بعد كذا يوم وساعة (تاريخ ويوم وساعة)":
         days_input = st.sidebar.number_input("أدخل عدد الأيام:", min_value=0, step=1)
         hours_input = st.sidebar.number_input("أدخل عدد الساعات:", min_value=0, max_value=23, step=1)
@@ -118,6 +87,7 @@ def main():
             f"بعد {days_input} يوم و {hours_input} ساعة سيكون اليوم **{day_name}** والتاريخ **{date_str}** والوقت حوالي **{time_str} {period}**"
         )
 
+    # ✅ الخيار 3: إلى التاريخ والساعة
     elif option == "إلى التاريخ والساعة (كم تبقى من يوم وساعة)":
         today_default = now.strftime("%Y/%m/%d")
         time_default = now.strftime("%H:%M")
@@ -134,9 +104,7 @@ def main():
                 if len(parts) == 3:
                     year, month, day = map(int, parts)
                     parsed_time = parse_time_input(time_input_str)
-                    if parsed_time is None:
-                        st.sidebar.error("⚠️ صيغة الوقت غير صحيحة.")
-                    else:
+                    if parsed_time:
                         hour, minute = parsed_time
                         if am_pm_choice == "PM" and hour < 12:
                             hour += 12
@@ -146,36 +114,21 @@ def main():
                         target_datetime = datetime(year, month, day, hour, minute)
                         diff = target_datetime - now
                         if diff.total_seconds() > 0:
-                            days_left = diff.days
-                            hours_left = diff.seconds // 3600
-                            minutes_left = (diff.seconds % 3600) // 60
-                            day_name = days_ar[target_datetime.weekday()]
-
-                            period = "صباحًا" if target_datetime.hour < 12 else "مساءً"
-                            time_display = target_datetime.strftime("%I:%M").lstrip("0")
-
-                            st.sidebar.info(
-                                f"يتبقى **{days_left} يوم** و **{hours_left} ساعة** و **{minutes_left} دقيقة**\n"
-                                f"(يصادف اليوم {day_name} الساعة {time_display} {period})"
-                            )
+                            st.sidebar.info(f"يتبقى {diff.days} يوم و {diff.seconds//3600} ساعة و {(diff.seconds%3600)//60} دقيقة")
                         else:
                             st.sidebar.warning("⏳ التاريخ والوقت المحددين قد مرا بالفعل.")
-                else:
-                    st.sidebar.error("⚠️ صيغة التاريخ غير صحيحة.")
-            except ValueError:
+            except:
                 st.sidebar.error("⚠️ صيغة التاريخ غير صحيحة.")
 
+    # ✅ الخيار 4: تحويل بين تاريخين
     elif option == "تحويل بين تاريخين":
-        default_date = datetime.now().date()
-        default_time = datetime.now().time()
-
         st.sidebar.markdown("### 📆 اختر التاريخين")
 
-        date1 = st.sidebar.date_input("التاريخ الأول", value=default_date)
-        time1 = st.sidebar.time_input("الوقت الأول", value=default_time)
+        date1 = st.sidebar.date_input("التاريخ الأول", value=datetime.now().date())
+        time1 = st.sidebar.time_input("الوقت الأول", value=datetime.now().time())
 
-        date2 = st.sidebar.date_input("التاريخ الثاني", value=default_date)
-        time2 = st.sidebar.time_input("الوقت الثاني", value=default_time)
+        date2 = st.sidebar.date_input("التاريخ الثاني", value=datetime.now().date())
+        time2 = st.sidebar.time_input("الوقت الثاني", value=datetime.now().time())
 
         if st.sidebar.button("احسب الفرق"):
             dt1 = datetime.combine(date1, time1)
@@ -184,36 +137,29 @@ def main():
             diff_info = calc_date_difference(dt1, dt2)
 
             parts = []
-            if diff_info["years"] > 0:
-                parts.append(f"**{diff_info['years']} سنة**")
-            if diff_info["months"] > 0:
-                parts.append(f"**{diff_info['months']} شهر**")
-            if diff_info["days"] > 0:
-                parts.append(f"**{diff_info['days']} يوم**")
-            if diff_info["hours"] > 0:
-                parts.append(f"**{diff_info['hours']} ساعة**")
-            if diff_info["minutes"] > 0:
-                parts.append(f"**{diff_info['minutes']} دقيقة**")
+            if diff_info["years"]: parts.append(f"**{diff_info['years']} سنة**")
+            if diff_info["months"]: parts.append(f"**{diff_info['months']} شهر**")
+            if diff_info["days"]: parts.append(f"**{diff_info['days']} يوم**")
+            if diff_info["hours"]: parts.append(f"**{diff_info['hours']} ساعة**")
+            if diff_info["minutes"]: parts.append(f"**{diff_info['minutes']} دقيقة**")
 
             if not parts:
                 parts.append("0 دقيقة")
 
-            result_text = f"{diff_info['direction']} " + " و ".join(parts) + f"\n(الإجمالي: {diff_info['total_days']} يوم)"
+            st.sidebar.success(
+                f"{diff_info['direction']} " + " و ".join(parts) +
+                f"\n(الإجمالي: {diff_info['total_days']} يوم)"
+            )
 
-            st.sidebar.success(result_text)
-
-            # عرض يوم الأسبوع والوقت بنمط 12 ساعة للتاريخ الثاني
             day_name = days_ar[dt2.weekday()]
             period = "صباحًا" if dt2.hour < 12 else "مساءً"
             time_display = dt2.strftime("%I:%M").lstrip("0")
 
             st.sidebar.markdown(f"يصادف اليوم: **{day_name}** والساعة: **{time_display} {period}**")
 
-            # حساب وعرض التاريخ الهجري للتاريخ الثاني باستخدام الدالة المعدلة
             hijri_str = get_hijri_date(dt2)
             st.sidebar.markdown(f"التاريخ الهجري: **{hijri_str}**")
 
-    # عرض التواريخ في الصفحة الرئيسية
     dates = get_dates()
     render_time(time_now, today_name)
     render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now)
