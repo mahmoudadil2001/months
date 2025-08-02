@@ -79,12 +79,8 @@ def main():
         hours_input = st.sidebar.number_input("أدخل عدد الساعات:", min_value=0, max_value=23, step=1)
         future_time = now + timedelta(days=days_input, hours=hours_input)
         day_name = days_ar[future_time.weekday()]
-        date_str = future_time.strftime("%d-%m-%Y")
-        period = "صباحًا" if future_time.hour < 12 else "مساءً"
-        time_str = future_time.strftime("%I:%M").lstrip("0")
-        st.sidebar.success(
-            f"بعد {days_input} يوم و {hours_input} ساعة سيكون اليوم **{day_name}** والتاريخ **{date_str}** والوقت حوالي **{time_str} {period}**"
-        )
+        date_str = future_time.strftime("%Y/%m/%d")
+        st.sidebar.markdown(f"**{date_str}**\n\n**{day_name}**")
 
     # 🔹 3) إلى التاريخ والساعة
     elif option == "إلى التاريخ والساعة (كم تبقى من يوم وساعة)":
@@ -153,10 +149,7 @@ def main():
                 )
 
                 day_name = days_ar[dt2.weekday()]
-                period = "صباحًا" if dt2.hour < 12 else "مساءً"
-                time_display = dt2.strftime("%I:%M").lstrip("0")
-
-                st.sidebar.markdown(f"يصادف اليوم: **{day_name}** والساعة: **{time_display} {period}**")
+                st.sidebar.markdown(f"**{dt2.strftime('%Y/%m/%d')}**\n\n**{day_name}**")
 
                 hijri_str = get_hijri_date(dt2)
                 st.sidebar.markdown(f"التاريخ الهجري: **{hijri_str}**")
@@ -165,9 +158,12 @@ def main():
 
     # 🔹 5) هجري إلى ميلادي
     elif option == "هجري إلى ميلادي":
-        st.sidebar.markdown("### ✨ أدخل التاريخ الهجري (YYYY/MM/DD)")
+        today = datetime.utcnow() + timedelta(hours=3)
+        current_hijri = islamic.from_gregorian(today.year, today.month, today.day)
+        default_hijri = f"{current_hijri[0]}/{current_hijri[1]}/{current_hijri[2]}"
 
-        hijri_input = st.sidebar.text_input("التاريخ الهجري:", value="1445/01/01")
+        st.sidebar.markdown("### أدخل التاريخ الهجري (YYYY/MM/DD)")
+        hijri_input = st.sidebar.text_input("التاريخ الهجري:", value=default_hijri)
 
         if st.sidebar.button("تحويل"):
             try:
@@ -178,10 +174,7 @@ def main():
                     g_date = datetime(g_year, g_month, g_day)
 
                     day_name = days_ar[g_date.weekday()]
-                    st.sidebar.success(
-                        f"📅 التاريخ الميلادي: **{g_date.strftime('%Y-%m-%d')}**\n"
-                        f"🗓️ اليوم: **{day_name}**"
-                    )
+                    st.sidebar.markdown(f"**{g_date.strftime('%Y/%m/%d')}**\n\n**{day_name}**")
                 else:
                     st.sidebar.error("⚠️ الصيغة يجب أن تكون YYYY/MM/DD")
             except:
