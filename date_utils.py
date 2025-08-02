@@ -1,20 +1,15 @@
 from datetime import datetime
-from ummalqura.hijri_date import HijriDate
 from convertdate import islamic
 import dateutil.relativedelta
 
 
-def get_hijri_date_safe(dt: datetime) -> str:
+def get_hijri_date(dt: datetime) -> str:
     """
-    يحاول حساب التاريخ الهجري باستخدام ummalqura.
-    إذا التاريخ خارج النطاق، يستخدم convertdate كبديل تقريبي.
+    حساب التاريخ الهجري باستخدام مكتبة convertdate بشكل مباشر،
+    لتجنب مشكلة نطاق أم القرى.
     """
-    try:
-        hijri_date = HijriDate(dt.year, dt.month, dt.day, gr=True)
-        return f"{hijri_date.year}/{hijri_date.month}/{hijri_date.day} (أم القرى)"
-    except Exception:
-        islamic_date = islamic.from_gregorian(dt.year, dt.month, dt.day)
-        return f"{islamic_date[0]}/{islamic_date[1]}/{islamic_date[2]} (تقريبي - خارج نطاق أم القرى)"
+    islamic_date = islamic.from_gregorian(dt.year, dt.month, dt.day)
+    return f"{islamic_date[0]}/{islamic_date[1]}/{islamic_date[2]} (تقريبي)"
 
 
 def calc_date_difference(dt1: datetime, dt2: datetime) -> dict:
