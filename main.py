@@ -1,5 +1,5 @@
 import streamlit as st
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 from ummalqura.hijri_date import HijriDate
 import dateutil.relativedelta
 
@@ -171,20 +171,10 @@ def main():
 
         st.sidebar.markdown("### 📆 اختر التاريخين")
 
-        date1 = st.sidebar.date_input(
-            "التاريخ الأول",
-            value=default_date,
-            min_value=date(1900, 1, 1),
-            max_value=date(2100, 12, 31)
-        )
+        date1 = st.sidebar.date_input("التاريخ الأول", value=default_date)
         time1 = st.sidebar.time_input("الوقت الأول", value=default_time)
 
-        date2 = st.sidebar.date_input(
-            "التاريخ الثاني",
-            value=default_date,
-            min_value=date(1900, 1, 1),
-            max_value=date(2100, 12, 31)
-        )
+        date2 = st.sidebar.date_input("التاريخ الثاني", value=default_date)
         time2 = st.sidebar.time_input("الوقت الثاني", value=default_time)
 
         if st.sidebar.button("احسب الفرق"):
@@ -222,6 +212,21 @@ def main():
             result_text = f"{direction} " + " و ".join(parts) + f"\n(الإجمالي: {total_days} يوم)"
 
             st.sidebar.success(result_text)
+
+            # اليوم والساعة للتاريخ الثاني
+            day_name_2 = days_ar[dt2.weekday()]
+            period_2 = "صباحًا" if dt2.hour < 12 else "مساءً"
+            time_display_2 = dt2.strftime("%I:%M").lstrip("0")
+
+            st.sidebar.markdown(f"يصادف: **{day_name_2}** والساعة: **{time_display_2} {period_2}**")
+
+            # التاريخ الهجري للتاريخ الثاني
+            try:
+                hijri_date_2 = HijriDate(dt2.year, dt2.month, dt2.day, gr=True)
+                hijri_str_2 = f"({hijri_date_2.year}/{hijri_date_2.month}/{hijri_date_2.day} {months_hijri[hijri_date_2.month - 1]})"
+                st.sidebar.markdown(f"التاريخ الهجري: **{hijri_str_2}**")
+            except Exception:
+                st.sidebar.markdown("التاريخ الهجري: غير متوفر")
 
     dates = get_dates()
     render_time(time_now, today_name)
