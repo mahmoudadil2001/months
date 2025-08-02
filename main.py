@@ -1,5 +1,5 @@
 import streamlit as st
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 from date_utils import get_hijri_date, calc_date_difference
 from data import get_dates, months_en, months_ar1, months_ar2, months_hijri
@@ -27,17 +27,28 @@ def main():
         index=0,
     )
 
-    # هنا فقط كود الخيار الجديد "تحويل بين تاريخين"
+    # خياراتك الأخرى هنا (كما في كودك الأصلي)...
+
     if option == "تحويل بين تاريخين":
         default_date = datetime.now().date()
         default_time = datetime.now().time()
 
         st.sidebar.markdown("### 📆 اختر التاريخين")
 
-        date1 = st.sidebar.date_input("التاريخ الأول", value=default_date)
+        date1 = st.sidebar.date_input(
+            "التاريخ الأول",
+            value=default_date,
+            min_value=date(1999, 1, 1),      # <-- هنا تم توسيع النطاق
+            max_value=date(2050, 12, 31)
+        )
         time1 = st.sidebar.time_input("الوقت الأول", value=default_time)
 
-        date2 = st.sidebar.date_input("التاريخ الثاني", value=default_date)
+        date2 = st.sidebar.date_input(
+            "التاريخ الثاني",
+            value=default_date,
+            min_value=date(1999, 1, 1),      # <-- هنا أيضًا
+            max_value=date(2050, 12, 31)
+        )
         time2 = st.sidebar.time_input("الوقت الثاني", value=default_time)
 
         if st.sidebar.button("احسب الفرق"):
@@ -76,7 +87,7 @@ def main():
             hijri_str = get_hijri_date(dt2)
             st.sidebar.markdown(f"التاريخ الهجري: **{hijri_str}**")
 
-    # يمكنك إضافة باقي خياراتك هنا (بعد كذا يوم، بعد كذا يوم وساعة، إلى التاريخ والساعة)
+    # تابع هنا باقي كودك كما في ملف main الأصلي (خيارات أخرى، عرض الوقت، الرندر...)
 
     dates = get_dates()
     render_time(time_now, today_name)
