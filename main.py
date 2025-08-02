@@ -1,10 +1,34 @@
 import streamlit as st
-from datetime import datetime, timedelta, date, time
+from datetime import datetime, timedelta
+from ummalqura.hijri_date import HijriDate
 
 from date_utils import get_hijri_date, calc_date_difference
 from data import get_dates, months_en, months_ar1, months_ar2, months_hijri
 from ui_time import render_time
 from ui_render import render_html
+
+
+def parse_time_input(time_str):
+    time_str = time_str.strip()
+    if ":" in time_str:
+        parts = time_str.split(":")
+        if len(parts) == 2:
+            try:
+                hour = int(parts[0])
+                minute = int(parts[1])
+                if 0 <= hour < 24 and 0 <= minute < 60:
+                    return hour, minute
+            except:
+                return None
+        return None
+    else:
+        try:
+            hour = int(time_str)
+            if 0 <= hour < 24:
+                return hour, 0
+        except:
+            return None
+    return None
 
 
 def main():
@@ -27,9 +51,6 @@ def main():
         index=0,
     )
 
-    min_allowed_date = date(1999, 1, 1)
-    max_allowed_date = date(2050, 12, 31)
-
     if option == "بعد كذا يوم (تاريخ ميلادي وهجري ويوم)":
         days_ahead = st.sidebar.number_input("أدخل عدد الأيام للنقل إلى الأمام:", min_value=0, step=1)
 
@@ -40,7 +61,8 @@ def main():
         st.sidebar.markdown(f"- ميلادي: {transported_date.strftime('%d-%m-%Y')}")
 
         try:
-            hijri_str = get_hijri_date(transported_date)
+            hijri_date = HijriDate(transported_date.year, transported_date.month, transported_date.day, gr=True)
+            hijri_str = f"{hijri_date.day} / {hijri_date.month} / {hijri_date.year}"
         except Exception:
             hijri_str = "غير متوفر"
 
@@ -144,25 +166,15 @@ def main():
                 st.sidebar.error("⚠️ صيغة التاريخ غير صحيحة.")
 
     elif option == "تحويل بين تاريخين":
-        default_date = now.date()
-        default_time = now.time()
+        default_date = datetime.now().date()
+        default_time = datetime.now().time()
 
         st.sidebar.markdown("### 📆 اختر التاريخين")
 
-        date1 = st.sidebar.date_input(
-            "التاريخ الأول",
-            value=default_date,
-            min_value=min_allowed_date,
-            max_value=max_allowed_date,
-        )
+        date1 = st.sidebar.date_input("التاريخ الأول", value=default_date)
         time1 = st.sidebar.time_input("الوقت الأول", value=default_time)
 
-        date2 = st.sidebar.date_input(
-            "التاريخ الثاني",
-            value=default_date,
-            min_value=min_allowed_date,
-            max_value=max_allowed_date,
-        )
+        date2 = st.sidebar.date_input("التاريخ الثاني", value=default_date)
         time2 = st.sidebar.time_input("الوقت الثاني", value=default_time)
 
         if st.sidebar.button("احسب الفرق"):
@@ -190,43 +202,21 @@ def main():
 
             st.sidebar.success(result_text)
 
+            # عرض يوم الأسبوع والوقت بنمط 12 ساعة للتاريخ الثاني
             day_name = days_ar[dt2.weekday()]
             period = "صباحًا" if dt2.hour < 12 else "مساءً"
             time_display = dt2.strftime("%I:%M").lstrip("0")
 
             st.sidebar.markdown(f"يصادف اليوم: **{day_name}** والساعة: **{time_display} {period}**")
 
+            # حساب وعرض التاريخ الهجري للتاريخ الثاني باستخدام الدالة المعدلة
             hijri_str = get_hijri_date(dt2)
             st.sidebar.markdown(f"التاريخ الهجري: **{hijri_str}**")
 
-    # تابع باقي الصفحة
-
+    # عرض التواريخ في الصفحة الرئيسية
     dates = get_dates()
     render_time(time_now, today_name)
     render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now)
-
-
-def parse_time_input(time_str):
-    time_str = time_str.strip()
-    if ":" in time_str:
-        parts = time_str.split(":")
-        if len(parts) == 2:
-            try:
-                hour = int(parts[0])
-                minute = int(parts[1])
-                if 0 <= hour < 24 and 0 <= minute < 60:
-                    return hour, minute
-            except:
-                return None
-        return None
-    else:
-        try:
-            hour = int(time_str)
-            if 0 <= hour < 24:
-                return hour, 0
-        except:
-            return None
-    return None
 
 
 if __name__ == "__main__":
