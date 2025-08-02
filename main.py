@@ -1,10 +1,12 @@
 import streamlit as st
 from datetime import datetime, timedelta
+from convertdate import islamic
 
 from date_utils import get_hijri_date, calc_date_difference
 from data import get_dates, months_en, months_ar1, months_ar2, months_hijri
 from ui_time import render_time
 from ui_render import render_html
+
 
 def parse_time_input(time_str):
     time_str = time_str.strip()
@@ -27,11 +29,13 @@ def parse_time_input(time_str):
             return None
     return None
 
+
 def parse_date_input(date_str):
     try:
         return datetime.strptime(date_str.strip(), "%Y-%m-%d").date()
     except:
         return None
+
 
 def main():
     st.set_page_config(page_title="التقويم الميلادي والهجري", layout="centered")
@@ -48,12 +52,13 @@ def main():
             "بعد كذا يوم (تاريخ ميلادي وهجري ويوم)",
             "بعد كذا يوم وساعة (تاريخ ويوم وساعة)",
             "إلى التاريخ والساعة (كم تبقى من يوم وساعة)",
-            "تحويل بين تاريخين"
+            "تحويل بين تاريخين",
+            "هجري إلى ميلادي"
         ],
         index=0,
     )
 
-    # ✅ الخيارات الأخرى مثل كودك الأساسي
+    # 🔹 1) بعد كذا يوم
     if option == "بعد كذا يوم (تاريخ ميلادي وهجري ويوم)":
         days_ahead = st.sidebar.number_input("أدخل عدد الأيام للنقل إلى الأمام:", min_value=0, step=1)
         transported_date = now + timedelta(days=days_ahead)
@@ -68,6 +73,7 @@ def main():
             unsafe_allow_html=True
         )
 
+    # 🔹 2) بعد كذا يوم وساعة
     elif option == "بعد كذا يوم وساعة (تاريخ ويوم وساعة)":
         days_input = st.sidebar.number_input("أدخل عدد الأيام:", min_value=0, step=1)
         hours_input = st.sidebar.number_input("أدخل عدد الساعات:", min_value=0, max_value=23, step=1)
@@ -80,10 +86,11 @@ def main():
             f"بعد {days_input} يوم و {hours_input} ساعة سيكون اليوم **{day_name}** والتاريخ **{date_str}** والوقت حوالي **{time_str} {period}**"
         )
 
+    # 🔹 3) إلى التاريخ والساعة
     elif option == "إلى التاريخ والساعة (كم تبقى من يوم وساعة)":
-        today_default = now.strftime("%Y/%m/%d")
+        today_default = now.strftime("%Y-%m-%d")
         time_default = now.strftime("%H:%M")
-        date_input_str = st.sidebar.text_input("ادخل التاريخ المستقبلي (YYYY-MM-DD):", value=now.strftime("%Y-%m-%d"))
+        date_input_str = st.sidebar.text_input("ادخل التاريخ المستقبلي (YYYY-MM-DD):", value=today_default)
 
         col1, col2 = st.sidebar.columns([2, 1])
         time_input_str = col1.text_input("ادخل الساعة:", value=time_default)
@@ -108,7 +115,7 @@ def main():
         else:
             st.sidebar.error("⚠️ صيغة التاريخ أو الوقت غير صحيحة.")
 
-    # ✅ 🔥 الزر الرابع بدون أي خطأ نطاق
+    # 🔹 4) تحويل بين تاريخين
     elif option == "تحويل بين تاريخين":
         st.sidebar.markdown("### 📆 أدخل التاريخين يدويًا (YYYY-MM-DD)")
 
@@ -156,9 +163,35 @@ def main():
             else:
                 st.sidebar.error("⚠️ تحقق من صيغة التواريخ والأوقات.")
 
+    # 🔹 5) هجري إلى ميلادي
+    elif option == "هجري إلى ميلادي":
+        st.sidebar.markdown("### ✨ أدخل التاريخ الهجري (YYYY/MM/DD)")
+
+        hijri_input = st.sidebar.text_input("التاريخ الهجري:", value="1445/01/01")
+
+        if st.sidebar.button("تحويل"):
+            try:
+                parts = hijri_input.strip().split("/")
+                if len(parts) == 3:
+                    hy, hm, hd = map(int, parts)
+                    g_year, g_month, g_day = islamic.to_gregorian(hy, hm, hd)
+                    g_date = datetime(g_year, g_month, g_day)
+
+                    day_name = days_ar[g_date.weekday()]
+                    st.sidebar.success(
+                        f"📅 التاريخ الميلادي: **{g_date.strftime('%Y-%m-%d')}**\n"
+                        f"🗓️ اليوم: **{day_name}**"
+                    )
+                else:
+                    st.sidebar.error("⚠️ الصيغة يجب أن تكون YYYY/MM/DD")
+            except:
+                st.sidebar.error("⚠️ تحقق من صيغة التاريخ.")
+
+
     dates = get_dates()
     render_time(time_now, today_name)
     render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now)
+
 
 if __name__ == "__main__":
     main()
