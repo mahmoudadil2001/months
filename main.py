@@ -44,7 +44,8 @@ def main():
         [
             "بعد كذا يوم (تاريخ ميلادي وهجري ويوم)",
             "بعد كذا يوم وساعة (تاريخ ويوم وساعة)",
-            "إلى التاريخ والساعة (كم تبقى من يوم وساعة)"
+            "إلى التاريخ والساعة (كم تبقى من يوم وساعة)",
+            "تحويل بين تاريخين"
         ],
         index=0,
     )
@@ -165,6 +166,39 @@ def main():
                     st.sidebar.error("⚠️ صيغة التاريخ غير صحيحة.")
             except ValueError:
                 st.sidebar.error("⚠️ صيغة التاريخ غير صحيحة.")
+
+    # --------------------- الزر الرابع (الجديد) ----------------------
+    elif option == "تحويل بين تاريخين":
+        default_date = datetime.now().date()
+        default_time = datetime.now().time()
+
+        st.sidebar.markdown("### 📆 اختر التاريخين")
+
+        date1 = st.sidebar.date_input("التاريخ الأول", value=default_date)
+        time1 = st.sidebar.time_input("الوقت الأول", value=default_time)
+
+        date2 = st.sidebar.date_input("التاريخ الثاني", value=default_date)
+        time2 = st.sidebar.time_input("الوقت الثاني", value=default_time)
+
+        if st.sidebar.button("احسب الفرق"):
+            dt1 = datetime.combine(date1, time1)
+            dt2 = datetime.combine(date2, time2)
+
+            diff_seconds = (dt2 - dt1).total_seconds()
+            days_diff = abs(int(diff_seconds // 86400))
+
+            years = days_diff // 365
+            months = (days_diff % 365) // 30
+            days = (days_diff % 365) % 30
+
+            direction = "بعد" if diff_seconds > 0 else "قبل"
+
+            result_text = f"""
+            {direction} **{years} سنة** و **{months} شهر** و **{days} يوم**
+            \n(الإجمالي: {days_diff} يوم)
+            """
+
+            st.sidebar.success(result_text)
 
     # --------------------- باقي الصفحة ----------------------
     dates = get_dates()
