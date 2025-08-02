@@ -58,36 +58,45 @@ def main():
         index=0,
     )
 
-    # 🔹 1) بعد كذا يوم
+    # 🔹 الخيار الأول
     if option == "بعد كذا يوم (تاريخ ميلادي وهجري ويوم)":
         days_ahead = st.sidebar.number_input("أدخل عدد الأيام للنقل إلى الأمام:", min_value=0, step=1)
+
         transported_date = now + timedelta(days=days_ahead)
         transported_day_name = days_ar[transported_date.weekday()]
 
         st.sidebar.markdown(f"**التاريخ بعد {days_ahead} يوم هو:**")
         st.sidebar.markdown(f"- ميلادي: {transported_date.strftime('%d-%m-%Y')}")
+
         hijri_str = get_hijri_date(transported_date)
         st.sidebar.markdown(f"- هجري: {hijri_str}")
+
         st.sidebar.markdown(
             f"<div style='text-align:center; font-size:20px; font-weight:900; color:#0055cc; margin:10px 0;'>{transported_day_name}</div>",
             unsafe_allow_html=True
         )
 
-    # 🔹 2) بعد كذا يوم وساعة
+    # 🔹 الخيار الثاني
     elif option == "بعد كذا يوم وساعة (تاريخ ويوم وساعة)":
         days_input = st.sidebar.number_input("أدخل عدد الأيام:", min_value=0, step=1)
         hours_input = st.sidebar.number_input("أدخل عدد الساعات:", min_value=0, max_value=23, step=1)
+
         future_time = now + timedelta(days=days_input, hours=hours_input)
         day_name = days_ar[future_time.weekday()]
-        date_str = future_time.strftime("%Y/%m/%d")
-        st.sidebar.markdown(f"**{date_str}**\n\n**{day_name}**")
+        date_str = future_time.strftime("%d-%m-%Y")
+        period = "صباحًا" if future_time.hour < 12 else "مساءً"
+        time_str = future_time.strftime("%I:%M").lstrip("0")
 
-    # 🔹 3) إلى التاريخ والساعة
+        st.sidebar.success(
+            f"بعد {days_input} يوم و {hours_input} ساعة سيكون اليوم **{day_name}** والتاريخ **{date_str}** والوقت حوالي **{time_str} {period}**"
+        )
+
+    # 🔹 الخيار الثالث
     elif option == "إلى التاريخ والساعة (كم تبقى من يوم وساعة)":
-        today_default = now.strftime("%Y-%m-%d")
+        today_default = now.strftime("%Y/%m/%d")
         time_default = now.strftime("%H:%M")
-        date_input_str = st.sidebar.text_input("ادخل التاريخ المستقبلي (YYYY-MM-DD):", value=today_default)
 
+        date_input_str = st.sidebar.text_input("ادخل التاريخ المستقبلي (YYYY-MM-DD):", value=now.strftime("%Y-%m-%d"))
         col1, col2 = st.sidebar.columns([2, 1])
         time_input_str = col1.text_input("ادخل الساعة:", value=time_default)
         am_pm_choice = col2.selectbox("AM/PM", ["AM", "PM"])
@@ -111,7 +120,7 @@ def main():
         else:
             st.sidebar.error("⚠️ صيغة التاريخ أو الوقت غير صحيحة.")
 
-    # 🔹 4) تحويل بين تاريخين
+    # 🔹 الخيار الرابع
     elif option == "تحويل بين تاريخين":
         st.sidebar.markdown("### 📆 أدخل التاريخين يدويًا (YYYY-MM-DD)")
 
@@ -149,14 +158,17 @@ def main():
                 )
 
                 day_name = days_ar[dt2.weekday()]
-                st.sidebar.markdown(f"**{dt2.strftime('%Y/%m/%d')}**\n\n**{day_name}**")
+                period = "صباحًا" if dt2.hour < 12 else "مساءً"
+                time_display = dt2.strftime("%I:%M").lstrip("0")
+
+                st.sidebar.markdown(f"يصادف اليوم: **{day_name}** والساعة: **{time_display} {period}**")
 
                 hijri_str = get_hijri_date(dt2)
                 st.sidebar.markdown(f"التاريخ الهجري: **{hijri_str}**")
             else:
                 st.sidebar.error("⚠️ تحقق من صيغة التواريخ والأوقات.")
 
-    # 🔹 5) هجري إلى ميلادي
+    # 🔹 الخيار الخامس (الإضافة الجديدة)
     elif option == "هجري إلى ميلادي":
         today = datetime.utcnow() + timedelta(hours=3)
         current_hijri = islamic.from_gregorian(today.year, today.month, today.day)
@@ -179,7 +191,6 @@ def main():
                     st.sidebar.error("⚠️ الصيغة يجب أن تكون YYYY/MM/DD")
             except:
                 st.sidebar.error("⚠️ تحقق من صيغة التاريخ.")
-
 
     dates = get_dates()
     render_time(time_now, today_name)
