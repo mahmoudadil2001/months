@@ -1,9 +1,10 @@
 import streamlit as st
 from datetime import datetime, timedelta, date
+import dateutil.relativedelta
+
 from ummalqura.hijri_date import HijriDate
 from hijri_converter import Gregorian
-import convertdate.islamic as islamic
-import dateutil.relativedelta
+from convertdate import islamic
 
 from data import get_dates, months_en, months_ar1, months_ar2, months_hijri
 from ui_time import render_time
@@ -34,21 +35,21 @@ def parse_time_input(time_str):
 
 
 def to_hijri(dt: date):
-    # أولاً جرب ummalqura
+    # محاولة التحويل باستخدام ummalqura (دقيق ولكن نطاق محدود)
     try:
         hijri_date = HijriDate(dt.year, dt.month, dt.day, gr=True)
         return hijri_date.year, hijri_date.month, hijri_date.day, "أم القرى"
     except Exception:
         pass
 
-    # ثم hijri-converter
+    # محاولة التحويل باستخدام hijri-converter (أوسع نطاقاً)
     try:
         hijri_date = Gregorian(dt.year, dt.month, dt.day).to_hijri()
         return hijri_date.year, hijri_date.month, hijri_date.day, "Hijri-Converter"
     except Exception:
         pass
 
-    # ثم convertdate (تقريبي)
+    # محاولة التحويل باستخدام convertdate (تقريبي وأوسع نطاق)
     try:
         y, m, d = islamic.from_gregorian(dt.year, dt.month, dt.day)
         return y, m, d, "Convertdate"
@@ -87,11 +88,8 @@ def main():
         st.sidebar.markdown(f"**التاريخ بعد {days_ahead} يوم هو:**")
         st.sidebar.markdown(f"- ميلادي: {transported_date.strftime('%d-%m-%Y')}")
 
-        try:
-            hijri_date = HijriDate(transported_date.year, transported_date.month, transported_date.day, gr=True)
-            hijri_str = f"{hijri_date.day} / {hijri_date.month} / {hijri_date.year}"
-        except Exception:
-            hijri_str = "غير متوفر"
+        hijri_year, hijri_month, hijri_day, source = to_hijri(transported_date.date())
+        hijri_str = f"{hijri_year} / {hijri_month} / {hijri_day} ({source})" if hijri_year else "غير متوفر"
 
         st.sidebar.markdown(f"- هجري: {hijri_str}")
         st.sidebar.markdown(
@@ -238,21 +236,16 @@ def main():
 
             result_text = f"{direction} " + " و ".join(parts) + f"\n(الإجمالي: {total_days} يوم)"
 
+            # إضافة يوم الأسبوع ونمط الساعة 12
+            day_name = days_ar[dt2.weekday()]
+            period = "صباحًا" if dt2.hour < 12 else "مساءً"
+            time_display = dt2.strftime("%I:%M").lstrip("0")
+            hijri_year2, hijri_month2, hijri_day2, hijri_source2 = to_hijri(dt2.date())
+            hijri_str2 = f"{hijri_year2}/{hijri_month2}/{hijri_day2} ({months_hijri[hijri_month2-1]})" if hijri_year2 else "غير متوفر"
+
             st.sidebar.success(result_text)
-
-            # إضافة معلومات اليوم والوقت للتاريخ الثاني
-            day_name2 = days_ar[dt2.weekday()]
-            period2 = "صباحًا" if dt2.hour < 12 else "مساءً"
-            time_display2 = dt2.strftime("%I:%M").lstrip("0")
-            st.sidebar.markdown(f"يصادف يوم {day_name2} الساعة {time_display2} {period2}")
-
-            # حساب التاريخ الهجري للتاريخ الثاني
-            y, m, d, lib_used = to_hijri(dt2.date())
-            if y is not None:
-                hijri_month_name = months_hijri[m-1] if 1 <= m <= 12 else "غير معروف"
-                st.sidebar.markdown(f"التاريخ الهجري ({lib_used}): {y} / {m} / {d} ({hijri_month_name})")
-            else:
-                st.sidebar.markdown("التاريخ الهجري: غير متوفر")
+            st.sidebar.markdown(f"يصادف اليوم: **{day_name}** والساعة: **{time_display} {period}**")
+            st.sidebar.markdown(f"التاريخ الهجري: **{hijri_str2}**")
 
     dates = get_dates()
     render_time(time_now, today_name)
