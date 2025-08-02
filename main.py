@@ -1,7 +1,7 @@
 import streamlit as st
 from datetime import datetime, timedelta
 
-from date_utils import get_hijri_date_safe, calc_date_difference
+from date_utils import get_hijri_date, calc_date_difference
 from data import get_dates, months_en, months_ar1, months_ar2, months_hijri
 from ui_time import render_time
 from ui_render import render_html
@@ -36,46 +36,13 @@ def main():
         st.sidebar.markdown(f"**التاريخ بعد {days_ahead} يوم هو:**")
         st.sidebar.markdown(f"- ميلادي: {transported_date.strftime('%d-%m-%Y')}")
 
-        # حساب هجري آمن
-        hijri_str = get_hijri_date_safe(transported_date)
+        hijri_str = get_hijri_date(transported_date)
         st.sidebar.markdown(f"- هجري: {hijri_str}")
 
         st.sidebar.markdown(
             f"<div style='text-align:center; font-size:20px; font-weight:900; color:#0055cc; margin:10px 0;'>{transported_day_name}</div>",
             unsafe_allow_html=True
         )
-
-        if days_ahead <= 210:
-            st.sidebar.markdown("### اليوم الحالي حتى اليوم المنقول")
-            total_days = days_ahead + 1
-
-            def start_of_week(date):
-                weekday = (date.weekday() + 1) % 7
-                return date - timedelta(days=weekday)
-
-            weeks_dict = {}
-            for i in range(total_days):
-                current_day = now + timedelta(days=i)
-                sow = start_of_week(current_day)
-                weeks_dict.setdefault(sow, []).append(current_day)
-
-            sorted_weeks = sorted(weeks_dict.items())
-
-            for week_num, (_, days_list) in enumerate(sorted_weeks, start=1):
-                for day_date in days_list:
-                    day_name = days_ar[day_date.weekday()]
-                    st.sidebar.markdown(
-                        f"<div style='direction:ltr; font-weight:600;'>{day_date.strftime('%Y/%m/%d')} - {day_name}</div>",
-                        unsafe_allow_html=True
-                    )
-
-                st.sidebar.markdown(
-                    f"<div style='font-weight:700; text-align:center; margin-top:4px;'>الأسبوع {week_num}</div>",
-                    unsafe_allow_html=True
-                )
-                st.sidebar.markdown("<hr style='margin-top:2px; margin-bottom:10px;'>", unsafe_allow_html=True)
-        else:
-            st.sidebar.warning("⚠️ لا أستطيع قراءة أكثر من 210 يوم")
 
     elif option == "بعد كذا يوم وساعة (تاريخ ويوم وساعة)":
         days_input = st.sidebar.number_input("أدخل عدد الأيام:", min_value=0, step=1)
@@ -101,34 +68,33 @@ def main():
         time_input_str = col1.text_input("ادخل الساعة:", value=time_default)
         am_pm_choice = col2.selectbox("AM/PM", ["AM", "PM"])
 
+        def parse_time_input(time_str):
+            time_str = time_str.strip()
+            if ":" in time_str:
+                parts = time_str.split(":")
+                if len(parts) == 2:
+                    try:
+                        hour = int(parts[0])
+                        minute = int(parts[1])
+                        if 0 <= hour < 24 and 0 <= minute < 60:
+                            return hour, minute
+                    except:
+                        return None
+                return None
+            else:
+                try:
+                    hour = int(time_str)
+                    if 0 <= hour < 24:
+                        return hour, 0
+                except:
+                    return None
+            return None
+
         if date_input_str and time_input_str:
             try:
                 parts = date_input_str.replace("-", "/").split("/")
                 if len(parts) == 3:
                     year, month, day = map(int, parts)
-                    # نفس دالة parse_time_input يمكنك نقلها للملف utils أو هنا إذا تريد
-                    def parse_time_input(time_str):
-                        time_str = time_str.strip()
-                        if ":" in time_str:
-                            parts = time_str.split(":")
-                            if len(parts) == 2:
-                                try:
-                                    hour = int(parts[0])
-                                    minute = int(parts[1])
-                                    if 0 <= hour < 24 and 0 <= minute < 60:
-                                        return hour, minute
-                                except:
-                                    return None
-                            return None
-                        else:
-                            try:
-                                hour = int(time_str)
-                                if 0 <= hour < 24:
-                                    return hour, 0
-                            except:
-                                return None
-                        return None
-
                     parsed_time = parse_time_input(time_input_str)
                     if parsed_time is None:
                         st.sidebar.error("⚠️ صيغة الوقت غير صحيحة.")
@@ -204,10 +170,9 @@ def main():
 
             st.sidebar.markdown(f"يصادف اليوم: **{day_name}** والساعة: **{time_display} {period}**")
 
-            hijri_str = get_hijri_date_safe(dt2)
+            hijri_str = get_hijri_date(dt2)
             st.sidebar.markdown(f"التاريخ الهجري: **{hijri_str}**")
 
-    # باقي الصفحة الرئيسية
     dates = get_dates()
     render_time(time_now, today_name)
     render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now)
