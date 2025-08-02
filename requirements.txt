@@ -1,3 +1,3 @@
 streamlit
 ummalqura
-dateutil
+python-dateutil
