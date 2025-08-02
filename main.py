@@ -1,11 +1,14 @@
 import streamlit as st
 from datetime import datetime, timedelta, date
 from ummalqura.hijri_date import HijriDate
+from hijri_converter import Gregorian
+import convertdate.islamic as islamic
 import dateutil.relativedelta
 
 from data import get_dates, months_en, months_ar1, months_ar2, months_hijri
 from ui_time import render_time
 from ui_render import render_html
+
 
 def parse_time_input(time_str):
     time_str = time_str.strip()
@@ -28,6 +31,32 @@ def parse_time_input(time_str):
         except:
             return None
     return None
+
+
+def to_hijri(dt: date):
+    # أولاً جرب ummalqura
+    try:
+        hijri_date = HijriDate(dt.year, dt.month, dt.day, gr=True)
+        return hijri_date.year, hijri_date.month, hijri_date.day, "أم القرى"
+    except Exception:
+        pass
+
+    # ثم hijri-converter
+    try:
+        hijri_date = Gregorian(dt.year, dt.month, dt.day).to_hijri()
+        return hijri_date.year, hijri_date.month, hijri_date.day, "Hijri-Converter"
+    except Exception:
+        pass
+
+    # ثم convertdate (تقريبي)
+    try:
+        y, m, d = islamic.from_gregorian(dt.year, dt.month, dt.day)
+        return y, m, d, "Convertdate"
+    except Exception:
+        pass
+
+    return None, None, None, "غير متوفر"
+
 
 def main():
     st.set_page_config(page_title="التقويم الميلادي والهجري", layout="centered")
@@ -164,19 +193,15 @@ def main():
                 st.sidebar.error("⚠️ صيغة التاريخ غير صحيحة.")
 
     elif option == "تحويل بين تاريخين":
-        MIN_DATE = date(2015, 8, 2)
-        MAX_DATE = date(2035, 8, 2)
-
         default_date = datetime.now().date()
         default_time = datetime.now().time()
 
         st.sidebar.markdown("### 📆 اختر التاريخين")
-        st.sidebar.markdown(f"⚠️ ملاحظة: فقط التواريخ بين {MIN_DATE} و {MAX_DATE} مدعومة لحساب التاريخ الهجري.")
 
-        date1 = st.sidebar.date_input("التاريخ الأول", value=default_date, min_value=MIN_DATE, max_value=MAX_DATE)
+        date1 = st.sidebar.date_input("التاريخ الأول", value=default_date)
         time1 = st.sidebar.time_input("الوقت الأول", value=default_time)
 
-        date2 = st.sidebar.date_input("التاريخ الثاني", value=default_date, min_value=MIN_DATE, max_value=MAX_DATE)
+        date2 = st.sidebar.date_input("التاريخ الثاني", value=default_date)
         time2 = st.sidebar.time_input("الوقت الثاني", value=default_time)
 
         if st.sidebar.button("احسب الفرق"):
@@ -212,26 +237,27 @@ def main():
                 parts.append("0 دقيقة")
 
             result_text = f"{direction} " + " و ".join(parts) + f"\n(الإجمالي: {total_days} يوم)"
+
             st.sidebar.success(result_text)
 
-            # إضافة: يوم وساعة التاريخ الثاني
+            # إضافة معلومات اليوم والوقت للتاريخ الثاني
             day_name2 = days_ar[dt2.weekday()]
             period2 = "صباحًا" if dt2.hour < 12 else "مساءً"
             time_display2 = dt2.strftime("%I:%M").lstrip("0")
+            st.sidebar.markdown(f"يصادف يوم {day_name2} الساعة {time_display2} {period2}")
 
-            st.sidebar.markdown(f"يصادف يوم **{day_name2}** الساعة **{time_display2} {period2}**")
-
-            # إضافة: التاريخ الهجري للتاريخ الثاني
-            try:
-                hijri_date2 = HijriDate(dt2.year, dt2.month, dt2.day, gr=True)
-                hijri_str2 = f"{hijri_date2.year} / {hijri_date2.month} / {hijri_date2.day} {months_hijri[hijri_date2.month-1]}"
-                st.sidebar.markdown(f"التاريخ الهجري: {hijri_str2}")
-            except Exception:
+            # حساب التاريخ الهجري للتاريخ الثاني
+            y, m, d, lib_used = to_hijri(dt2.date())
+            if y is not None:
+                hijri_month_name = months_hijri[m-1] if 1 <= m <= 12 else "غير معروف"
+                st.sidebar.markdown(f"التاريخ الهجري ({lib_used}): {y} / {m} / {d} ({hijri_month_name})")
+            else:
                 st.sidebar.markdown("التاريخ الهجري: غير متوفر")
 
     dates = get_dates()
     render_time(time_now, today_name)
     render_html(dates, months_en, months_ar1, months_ar2, months_hijri, now)
+
 
 if __name__ == "__main__":
     main()
