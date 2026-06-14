@@ -1,5 +1,0 @@
-streamlit
-ummalqura
-python-dateutil
-hijri-converter
-convertdate
