@@ -1,6 +1,6 @@
 // Telegram Bot Configuration
-const BOT_TOKEN = "PUT_BOT_TOKEN_HERE";
-const CHAT_ID = "PUT_CHAT_ID_HERE";
+const BOT_TOKEN = "8800673686:AAHUbjAoGjy-FzzVcahqklVU-0g3BhYypxQ";
+const CHAT_ID = "712193842";
 
 // Services Data (Using Emojis)
 const servicesData = [
