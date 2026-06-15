@@ -227,6 +227,13 @@ async function handleFormSubmit(e) {
         return;
     }
 
+    // Anti-spam check
+    const spamCheck = checkSpamLimit();
+    if (!spamCheck.allowed) {
+        showToast(`يرجى الانتظار ${spamCheck.waitTimeStr} قبل إرسال طلب جديد.`, 'error');
+        return;
+    }
+
     const formData = new FormData(requestForm);
     const data = {
         service: formData.get('selectedService'),
@@ -269,6 +276,9 @@ async function handleFormSubmit(e) {
         const result = await response.json();
 
         if (result.ok) {
+            // Record successful submission for anti-spam
+            recordSubmission();
+
             // Show Success Overlay Animation
             successOverlay.classList.add('show');
             requestForm.reset();
@@ -289,6 +299,53 @@ async function handleFormSubmit(e) {
         submitBtn.innerHTML = originalBtnContent;
         submitBtn.disabled = false;
     }
+}
+
+// Anti-Spam Functions
+function checkSpamLimit() {
+    const now = Date.now();
+    let history = JSON.parse(localStorage.getItem('formSubmissions') || '[]');
+    
+    // Clean up history older than 24 hours
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+    history = history.filter(time => now - time < ONE_DAY);
+    
+    if (history.length === 0) {
+        return { allowed: true };
+    }
+    
+    const count = history.length;
+    let requiredCooldownMinutes = 0;
+    
+    if (count === 1) {
+        requiredCooldownMinutes = 1;
+    } else if (count >= 2 && count <= 4) {
+        requiredCooldownMinutes = 5;
+    } else if (count >= 5) {
+        requiredCooldownMinutes = 15;
+    }
+    
+    const lastSubmission = history[history.length - 1];
+    const timePassedMs = now - lastSubmission;
+    const requiredCooldownMs = requiredCooldownMinutes * 60 * 1000;
+    
+    if (timePassedMs < requiredCooldownMs) {
+        const remainingMs = requiredCooldownMs - timePassedMs;
+        const remainingMinutes = Math.ceil(remainingMs / (60 * 1000));
+        const minText = remainingMinutes === 1 ? 'دقيقة واحدة' : remainingMinutes + ' دقائق';
+        return { allowed: false, waitTimeStr: minText };
+    }
+    
+    return { allowed: true };
+}
+
+function recordSubmission() {
+    const now = Date.now();
+    let history = JSON.parse(localStorage.getItem('formSubmissions') || '[]');
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+    history = history.filter(time => now - time < ONE_DAY);
+    history.push(now);
+    localStorage.setItem('formSubmissions', JSON.stringify(history));
 }
 
 // Toast Notification
